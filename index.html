@@ -402,13 +402,21 @@
         // --- MULTIPLAYER NETWORKING ---
         let peer = null, myConnection = null;
         let clients = {}; 
-        let nextPlayerIndex = 1;
 
         function startHostingLobby() {
             gameMode = "HOST";
             players.forEach(p => p.active = false);
             players[0].active = true; 
             players[0].setLoadout(document.getElementById("myChassis").value, document.getElementById("myWeapon").value);
+
+            // Wipe the lobby completely clean every time you hit "Host"
+            Object.values(clients).forEach(c => c.conn.close());
+            clients = {};
+            
+            for(let i=2; i<=4; i++) {
+                document.getElementById(`lobby-p${i}`).innerText = `Player ${i}: Waiting...`;
+                document.getElementById(`lobby-p${i}`).style.color = "#555";
+            }
 
             if(!peer) {
                 peer = new Peer();
@@ -421,13 +429,24 @@
             
             peer.on('connection', conn => {
                 conn.on('open', () => {
-                    if (gameState !== "MENU" || nextPlayerIndex > 3) {
+                    // Block duplicate background connections from the same person/tab
+                    if (clients[conn.peer]) return;
+
+                    // Find the actual first empty slot
+                    let pIdx = -1;
+                    for (let i = 1; i <= 3; i++) {
+                        if (!Object.values(clients).some(c => c.index === i)) {
+                            pIdx = i;
+                            break;
+                        }
+                    }
+
+                    if (gameState !== "MENU" || pIdx === -1) {
                         conn.send({ type: "ERROR", msg: "Lobby Full or Match Started!" });
                         setTimeout(() => conn.close(), 500);
                         return;
                     }
                     
-                    let pIdx = nextPlayerIndex++;
                     clients[conn.peer] = { 
                         index: pIdx, conn: conn, 
                         inputs: { forward: 0, turn: 0, swing: false, block: false } 
@@ -448,8 +467,11 @@
 
                     conn.on('close', () => {
                         players[pIdx].active = false;
-                        document.getElementById(`lobby-p${pIdx+1}`).innerText = `Player ${pIdx+1}: Disconnected`;
+                        document.getElementById(`lobby-p${pIdx+1}`).innerText = `Player ${pIdx+1}: Waiting...`;
                         document.getElementById(`lobby-p${pIdx+1}`).style.color = "#555";
+                        
+                        // Delete the client data so their slot actually empties out
+                        delete clients[conn.peer]; 
                     });
                 });
             });
@@ -458,7 +480,6 @@
         function cancelHost() {
             Object.values(clients).forEach(c => c.conn.close());
             clients = {};
-            nextPlayerIndex = 1;
             
             for(let i=2; i<=4; i++) {
                 document.getElementById(`lobby-p${i}`).innerText = `Player ${i}: Waiting...`;
