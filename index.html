@@ -413,9 +413,16 @@
             if(!peer) {
                 peer = new Peer();
                 peer.on('open', id => document.getElementById('hostIdDisplay').value = id);
-                peer.on('connection', conn => {
+            } else {
+                document.getElementById('hostIdDisplay').value = peer.id;
+            }
+
+            peer.off('connection'); 
+            
+            peer.on('connection', conn => {
+                conn.on('open', () => {
                     if (gameState !== "MENU" || nextPlayerIndex > 3) {
-                        conn.send({ type: "ERROR", msg: "Lobby Full or Game Started" });
+                        conn.send({ type: "ERROR", msg: "Lobby Full or Match Started!" });
                         setTimeout(() => conn.close(), 500);
                         return;
                     }
@@ -445,12 +452,18 @@
                         document.getElementById(`lobby-p${pIdx+1}`).style.color = "#555";
                     });
                 });
-            }
+            });
         }
 
         function cancelHost() {
-            if(peer) { peer.destroy(); peer = null; }
-            nextPlayerIndex = 1; clients = {};
+            Object.values(clients).forEach(c => c.conn.close());
+            clients = {};
+            nextPlayerIndex = 1;
+            
+            for(let i=2; i<=4; i++) {
+                document.getElementById(`lobby-p${i}`).innerText = `Player ${i}: Waiting...`;
+                document.getElementById(`lobby-p${i}`).style.color = "#555";
+            }
             showScreen('mainMenuScreen');
         }
 
@@ -460,7 +473,6 @@
             showScreen(null);
         }
 
-        // HELPER TO REJOIN THE LAST MATCH
         function rejoinLastGame() {
             const savedHost = localStorage.getItem('forkliftLastHostId');
             if (savedHost) {
@@ -473,20 +485,17 @@
             const hostId = overrideId || document.getElementById('joinIdInput').value.trim();
             if(!hostId) return;
             
-            // Save the ID so the user can easily rejoin later!
             localStorage.setItem('forkliftLastHostId', hostId);
-            
-            // Ensure the Rejoin button is visible now
             document.getElementById('rejoinBtn').style.display = 'block';
 
-            document.getElementById('joinStatus').innerText = "Connecting...";
+            document.getElementById('joinStatus').innerText = "Connecting to Host...";
             gameMode = "CLIENT";
             
-            if(!peer) peer = new Peer();
-            peer.on('open', () => {
-                myConnection = peer.connect(hostId);
+            const connectToHost = () => {
+                myConnection = peer.connect(hostId, { reliable: true });
+                
                 myConnection.on('open', () => {
-                    document.getElementById('joinStatus').innerText = "Waiting for Host to start...";
+                    document.getElementById('joinStatus').innerText = "Connected! Waiting for Host...";
                     myConnection.send({ 
                         type: 'LOADOUT', 
                         cId: document.getElementById("myChassis").value, 
@@ -503,7 +512,21 @@
                         document.getElementById('joinStatus').innerText = data.msg;
                     }
                 });
-            });
+
+                myConnection.on('close', () => {
+                    document.getElementById('joinStatus').innerText = "Host closed the connection.";
+                });
+            };
+
+            if(!peer) {
+                peer = new Peer();
+                peer.on('open', connectToHost);
+                peer.on('error', err => {
+                    document.getElementById('joinStatus').innerText = "Network Error: " + err.type;
+                });
+            } else {
+                connectToHost();
+            }
         }
 
         function startOfflineGame() {
