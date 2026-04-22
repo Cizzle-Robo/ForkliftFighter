@@ -9,7 +9,9 @@
         body { background-color: #222; color: #fff; font-family: 'Segoe UI', sans-serif; text-align: center; margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         h2 { margin: 10px 0; font-size: 24px; color: #FFF; }
         #gameContainer { flex: 1; position: relative; width: 100%; display: flex; justify-content: center; align-items: center; padding: 0 20px; box-sizing: border-box; }
-        canvas { background-color: #323232; border: 4px solid #555; box-shadow: 0 0 20px rgba(0,0,0,0.5); display: block; width: 100%; height: 100%; max-width: 1200px; border-radius: 8px; }
+        
+        /* Updated canvas styling for perfect fit */
+        canvas { background-color: #323232; border: 4px solid #555; box-shadow: 0 0 20px rgba(0,0,0,0.5); display: block; width: 100%; max-width: 1200px; border-radius: 8px; box-sizing: border-box; }
         
         .screen-overlay { position: absolute; top: 0; left: 20px; right: 20px; bottom: 0; max-width: 1200px; margin: 0 auto; background: rgba(0, 0, 0, 0.9); display: none; flex-direction: column; justify-content: center; align-items: center; border-radius: 8px; z-index: 10; overflow-y: auto; }
         #mainMenuScreen { display: flex; }
@@ -307,17 +309,32 @@
                 this.isBlocking = false; this.blockTimer = 0; this.blockCooldown = 0;
                 this.updatePositions();
             }
+            
+            // NEW UPDATED MOVE FUNCTION
             move(forward, turn) {
+                // Handle turning and acceleration
                 this.angle += turn * this.stats.turn;
                 if (forward !== 0) this.speed += forward * this.stats.acc; else this.speed *= 0.92; 
                 if (this.speed > this.stats.maxSpeed) this.speed = this.stats.maxSpeed;
                 if (this.speed < -this.stats.maxSpeed / 2) this.speed = -this.stats.maxSpeed / 2;
 
-                const newX = this.x + Math.cos(this.angle) * this.speed; const newY = this.y + Math.sin(this.angle) * this.speed;
+                // Move the forklift
+                this.x += Math.cos(this.angle) * this.speed; 
+                this.y += Math.sin(this.angle) * this.speed;
+                
+                // Clamp coordinates to keep the forklift strictly inside the arena
                 const bounds = this.stats.w / 2;
-                if (newX > bounds && newX < canvas.width - bounds) this.x = newX; else this.speed *= -0.5; 
-                if (newY > bounds && newY < canvas.height - bounds) this.y = newY; else this.speed *= -0.5; 
+                let hitWall = false;
+
+                if (this.x < bounds) { this.x = bounds; hitWall = true; }
+                if (this.x > canvas.width - bounds) { this.x = canvas.width - bounds; hitWall = true; }
+                if (this.y < bounds) { this.y = bounds; hitWall = true; }
+                if (this.y > canvas.height - bounds) { this.y = canvas.height - bounds; hitWall = true; }
+
+                // Bounce off the wall if we hit it
+                if (hitWall) this.speed *= -0.5; 
             }
+
             swing() { if (!this.isSwinging && this.swordAngle <= 0 && !this.isBlocking) { this.isSwinging = true; this.hasHitThisSwing = false; playSound('swing'); } }
             block() { if (!this.isSwinging && !this.isBlocking && this.blockCooldown === 0) { this.isBlocking = true; this.blockTimer = 15; this.blockCooldown = 60; playSound('block'); } }
             updateAbilities() {
@@ -383,10 +400,14 @@
             new Forklift(3, "#32C832", "Player 4")
         ];
 
+        // NEW UPDATED RESIZE FUNCTION
         function resizeCanvas() {
             const container = document.getElementById("gameContainer");
-            canvas.width = container.clientWidth - 40; canvas.height = container.clientHeight;
+            // Subtracting padding to ensure it fits perfectly inside the view
+            canvas.width = container.clientWidth - 40; 
+            canvas.height = container.clientHeight - 20; 
         }
+        
         window.addEventListener("resize", resizeCanvas);
         resizeCanvas();
 
