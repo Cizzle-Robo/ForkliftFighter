@@ -10,7 +10,6 @@
         h2 { margin: 10px 0; font-size: 24px; color: #FFF; }
         #gameContainer { flex: 1; position: relative; width: 100%; display: flex; justify-content: center; align-items: center; padding: 0 20px; box-sizing: border-box; }
         
-        /* Updated canvas styling for perfect fit */
         canvas { background-color: #323232; border: 4px solid #555; box-shadow: 0 0 20px rgba(0,0,0,0.5); display: block; width: 100%; max-width: 1200px; border-radius: 8px; box-sizing: border-box; }
         
         .screen-overlay { position: absolute; top: 0; left: 20px; right: 20px; bottom: 0; max-width: 1200px; margin: 0 auto; background: rgba(0, 0, 0, 0.9); display: none; flex-direction: column; justify-content: center; align-items: center; border-radius: 8px; z-index: 10; overflow-y: auto; }
@@ -24,6 +23,10 @@
         .menu-btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .back-btn { background: #222; margin-top: 30px; width: 200px; font-size: 16px; }
         
+        /* IN-GAME QUIT BUTTON */
+        #inGameMenuBtn { position: absolute; top: 15px; left: 35px; padding: 8px 15px; font-size: 14px; background: #C83232; border-color: #FF0000; display: none; z-index: 5; }
+        #inGameMenuBtn:hover { background: #FF0000; color: #FFF; border-color: #FFF; }
+
         .menu-box { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px; border: 1px solid #555; margin: 10px; display: flex; flex-direction: column; gap: 15px; align-items: center; width: 350px; }
         .menu-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }
         
@@ -48,6 +51,7 @@
     
     <div id="gameContainer">
         <canvas id="gameCanvas"></canvas>
+        <button id="inGameMenuBtn" class="menu-btn" onclick="quitToMenu()">Quit to Menu</button>
         
         <div id="mainMenuScreen" class="screen-overlay">
             <h1>Warehouse Warfare</h1>
@@ -82,6 +86,9 @@
                     <label>Graphics Quality:</label><select id="gfxSelect" onchange="updateSetting('graphics', this.value)"><option value="high">High (Neon Glow)</option><option value="low">Low (Flat & Fast)</option></select>
                     <label style="margin-top: 10px;">SFX Status:</label><select id="sfxSelect" onchange="updateSetting('sfxEnabled', this.value === 'on')"><option value="on">Enabled</option><option value="off">Disabled</option></select>
                     <label style="margin-top: 10px;">SFX Volume:</label><input type="range" id="sfxVolume" min="0" max="1" step="0.1" value="0.5" onchange="updateSetting('sfxVolume', parseFloat(this.value))">
+                    
+                    <label style="margin-top: 15px; color: #FF00FF;">Secret Code:</label>
+                    <input type="text" id="secretCodeInput" placeholder="Enter code here..." oninput="checkSecretCode(this.value)">
                 </div>
                 <div class="loadout-box" style="border-color: #FFD700;">
                     <h3 style="color: #FFD700; margin: 0 0 10px 0;">Primary Controls</h3>
@@ -89,7 +96,7 @@
                     <div class="keybind-row"><span>Reverse</span><button class="keybind-btn" onclick="startRebind('p1', 'down', this)" id="kb-p1-down">KeyS</button></div>
                     <div class="keybind-row"><span>Left</span><button class="keybind-btn" onclick="startRebind('p1', 'left', this)" id="kb-p1-left">KeyA</button></div>
                     <div class="keybind-row"><span>Right</span><button class="keybind-btn" onclick="startRebind('p1', 'right', this)" id="kb-p1-right">KeyD</button></div>
-                    <div class="keybind-row"><span>Swing</span><button class="keybind-btn" onclick="startRebind('p1', 'swing', this)" id="kb-p1-swing">Space</button></div>
+                    <div class="keybind-row"><span>Swing/Fire</span><button class="keybind-btn" onclick="startRebind('p1', 'swing', this)" id="kb-p1-swing">Space</button></div>
                     <div class="keybind-row"><span>Parry</span><button class="keybind-btn" onclick="startRebind('p1', 'block', this)" id="kb-p1-block">KeyE</button></div>
                 </div>
                 <div class="loadout-box" style="border-color: #C83232;">
@@ -98,7 +105,7 @@
                     <div class="keybind-row"><span>Reverse</span><button class="keybind-btn" onclick="startRebind('p2', 'down', this)" id="kb-p2-down">ArrowDown</button></div>
                     <div class="keybind-row"><span>Left</span><button class="keybind-btn" onclick="startRebind('p2', 'left', this)" id="kb-p2-left">ArrowLeft</button></div>
                     <div class="keybind-row"><span>Right</span><button class="keybind-btn" onclick="startRebind('p2', 'right', this)" id="kb-p2-right">ArrowRight</button></div>
-                    <div class="keybind-row"><span>Swing</span><button class="keybind-btn" onclick="startRebind('p2', 'swing', this)" id="kb-p2-swing">ShiftRight</button></div>
+                    <div class="keybind-row"><span>Swing/Fire</span><button class="keybind-btn" onclick="startRebind('p2', 'swing', this)" id="kb-p2-swing">ShiftRight</button></div>
                     <div class="keybind-row"><span>Parry</span><button class="keybind-btn" onclick="startRebind('p2', 'block', this)" id="kb-p2-block">Slash</button></div>
                 </div>
             </div>
@@ -111,8 +118,25 @@
                 <div class="loadout-box" style="border-color: #FFD700;">
                     <h3 style="color: #FFF; margin: 0 0 10px 0;">Your Loadout</h3>
                     <p style="color: #AAA; font-size: 14px; margin-top: 0;">Sent to Host when joining online.</p>
-                    <label>Chassis Type:</label><select id="myChassis" onchange="saveLoadout()"><option value="standard">Standard</option><option value="bulldozer">Bulldozer</option><option value="speedster">Speedster</option><option value="tank">Tank</option><option value="drifter">Drifter</option></select>
-                    <label>Weapon Type:</label><select id="myWeapon" onchange="saveLoadout()"><option value="standard">Standard Fork</option><option value="greatsword">Greatsword</option><option value="rapier">Rapier</option><option value="lance">Lance</option><option value="dagger">Dagger</option></select>
+                    <label>Chassis Type:</label>
+                    <select id="myChassis" onchange="saveLoadout()">
+                        <option value="standard">Standard</option>
+                        <option value="bulldozer">Bulldozer</option>
+                        <option value="speedster">Speedster</option>
+                        <option value="tank">Tank</option>
+                        <option value="drifter">Drifter</option>
+                        <option id="opt-admin-chassis" value="admin" style="color: #FF00FF; font-weight: bold;" hidden>Admin Forklift</option>
+                    </select>
+                    
+                    <label>Weapon Type:</label>
+                    <select id="myWeapon" onchange="saveLoadout()">
+                        <option value="standard">Standard Fork</option>
+                        <option value="greatsword">Greatsword</option>
+                        <option value="rapier">Rapier</option>
+                        <option value="lance">Lance</option>
+                        <option value="dagger">Dagger</option>
+                        <option id="opt-admin-weapon" value="admin" style="color: #FF00FF; font-weight: bold;" hidden>Admin Gun</option>
+                    </select>
                 </div>
             </div>
             <button class="menu-btn back-btn" onclick="showScreen('mainMenuScreen')">Back to Menu</button>
@@ -141,9 +165,7 @@
                 <p>Enter Host ID:</p>
                 <input type="text" id="joinIdInput" placeholder="Paste ID here">
                 <button class="menu-btn" style="width: 100%; margin-top: 10px;" onclick="joinOnlineGame()">Connect</button>
-                
                 <button id="rejoinBtn" class="menu-btn" style="width: 100%; margin-top: 10px; background: #3264C8; display: none;" onclick="rejoinLastGame()">Rejoin Last Host</button>
-                
                 <p id="joinStatus" style="color: #FFD700; margin: 0;"></p>
             </div>
             <button class="menu-btn back-btn" onclick="showScreen('mainMenuScreen')">Cancel</button>
@@ -153,8 +175,8 @@
             <h1 id="winnerText" style="font-size: 60px;">Game Over</h1>
             <p style="color: #AAA; font-size: 20px; margin-bottom: 30px;">Do you want to play again?</p>
             <div style="display: flex; gap: 20px; justify-content: center;">
-                <button class="menu-btn" style="background: #333; width: 200px;" onclick="location.reload()">Main Menu</button>
-                <button class="menu-btn" style="background: #3264C8; width: 200px;" onclick="quickRejoin()">Rejoin Game</button>
+                <button class="menu-btn" style="background: #333; width: 200px;" onclick="quitToMenu()">Main Menu</button>
+                <button class="menu-btn" style="background: #3264C8; width: 200px;" onclick="quickRejoin()">Replay</button>
             </div>
         </div>
     </div>
@@ -171,17 +193,18 @@
         function safeStorageSet(key, value) { try { localStorage.setItem(key, value); } catch(e) {} }
         function safeStorageGet(key) { try { return localStorage.getItem(key); } catch(e) { return null; } }
 
-        // --- SETTINGS & KEYBINDS ---
+        // --- SETTINGS, KEYBINDS & SECRETS ---
         let gameSettings = { graphics: 'high', sfxEnabled: true, sfxVolume: 0.5 };
         let keyBinds = {
             p1: { up: 'KeyW', down: 'KeyS', left: 'KeyA', right: 'KeyD', swing: 'Space', block: 'KeyE' },
             p2: { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight', swing: 'ShiftRight', block: 'Slash' }
         };
 
-        // Load saved data on page load safely
         window.addEventListener('load', () => {
             const savedHost = safeStorageGet('forkliftLastHostId');
             if (savedHost) document.getElementById('rejoinBtn').style.display = 'block';
+
+            if (safeStorageGet('forkliftAdminUnlocked') === 'true') unlockAdmin();
 
             const savedChassis = safeStorageGet('forkliftChassis');
             if (savedChassis) document.getElementById('myChassis').value = savedChassis;
@@ -208,15 +231,23 @@
             }
         });
 
-        function updateSetting(key, value) {
-            gameSettings[key] = value;
-            safeStorageSet('forkliftSettings', JSON.stringify(gameSettings));
+        // --- SECRET CODE LOGIC ---
+        function checkSecretCode(val) {
+            if (val.trim().toUpperCase() === "ROBO") {
+                safeStorageSet('forkliftAdminUnlocked', 'true');
+                unlockAdmin();
+                const input = document.getElementById('secretCodeInput');
+                input.value = ""; input.placeholder = "ADMIN UNLOCKED!"; input.style.borderColor = "#FF00FF";
+            }
         }
 
-        function saveLoadout() {
-            safeStorageSet('forkliftChassis', document.getElementById("myChassis").value);
-            safeStorageSet('forkliftWeapon', document.getElementById("myWeapon").value);
+        function unlockAdmin() {
+            document.getElementById('opt-admin-chassis').hidden = false;
+            document.getElementById('opt-admin-weapon').hidden = false;
         }
+
+        function updateSetting(key, value) { gameSettings[key] = value; safeStorageSet('forkliftSettings', JSON.stringify(gameSettings)); }
+        function saveLoadout() { safeStorageSet('forkliftChassis', document.getElementById("myChassis").value); safeStorageSet('forkliftWeapon', document.getElementById("myWeapon").value); }
 
         const keys = {};
         let rebindingTarget = null;
@@ -225,11 +256,9 @@
             if (rebindingTarget) {
                 e.preventDefault();
                 keyBinds[rebindingTarget.player][rebindingTarget.action] = e.code;
-                rebindingTarget.btn.innerText = e.code;
-                rebindingTarget.btn.classList.remove('listening');
+                rebindingTarget.btn.innerText = e.code; rebindingTarget.btn.classList.remove('listening');
                 safeStorageSet('forkliftBinds', JSON.stringify(keyBinds));
-                rebindingTarget = null; 
-                return;
+                rebindingTarget = null; return;
             }
             keys[e.code] = true;
         });
@@ -252,6 +281,7 @@
             osc.connect(gain); gain.connect(audioCtx.destination);
             gain.gain.value = gameSettings.sfxVolume * 0.1; 
             const now = audioCtx.currentTime;
+            
             if (type === 'swing') {
                 osc.type = 'sine'; osc.frequency.setValueAtTime(400, now); osc.frequency.exponentialRampToValueAtTime(100, now + 0.15);
                 gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15); osc.start(now); osc.stop(now + 0.15);
@@ -263,6 +293,10 @@
                 osc.type = 'triangle'; osc.frequency.setValueAtTime(800, now); osc.frequency.linearRampToValueAtTime(1200, now + 0.1);
                 gain.gain.setValueAtTime(gain.gain.value * 1.5, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
                 osc.start(now); osc.stop(now + 0.1);
+            } else if (type === 'shoot') {
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(600, now); osc.frequency.exponentialRampToValueAtTime(100, now + 0.1);
+                gain.gain.setValueAtTime(gain.gain.value * 0.8, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                osc.start(now); osc.stop(now + 0.1);
             }
         }
 
@@ -272,21 +306,44 @@
             bulldozer: { w: 50, h: 40, maxSpeed: 3.5, acc: 0.15, turn: 0.04, hp: 150 },
             speedster: { w: 32, h: 22, maxSpeed: 8.5, acc: 0.50, turn: 0.10, hp: 60  },
             tank:      { w: 60, h: 45, maxSpeed: 2.5, acc: 0.10, turn: 0.03, hp: 200 },
-            drifter:   { w: 35, h: 25, maxSpeed: 7.0, acc: 0.20, turn: 0.15, hp: 80  }
+            drifter:   { w: 35, h: 25, maxSpeed: 7.0, acc: 0.20, turn: 0.15, hp: 80  },
+            admin:     { w: 40, h: 30, maxSpeed: 15.0, acc: 1.50, turn: 0.20, hp: 5000 }
         };
         const WEAPON_DB = {
-            standard:   { length: 70,  swingSpeed: 0.25, retractSpeed: 0.10, damage: 20 },
-            greatsword: { length: 100, swingSpeed: 0.12, retractSpeed: 0.04, damage: 40 },
-            rapier:     { length: 45,  swingSpeed: 0.50, retractSpeed: 0.25, damage: 10 },
-            lance:      { length: 140, swingSpeed: 0.08, retractSpeed: 0.05, damage: 30 },
-            dagger:     { length: 25,  swingSpeed: 0.80, retractSpeed: 0.40, damage: 15 }
+            standard:   { type: 'melee', length: 70,  swingSpeed: 0.25, retractSpeed: 0.10, damage: 20 },
+            greatsword: { type: 'melee', length: 100, swingSpeed: 0.12, retractSpeed: 0.04, damage: 40 },
+            rapier:     { type: 'melee', length: 45,  swingSpeed: 0.50, retractSpeed: 0.25, damage: 10 },
+            lance:      { type: 'melee', length: 140, swingSpeed: 0.08, retractSpeed: 0.05, damage: 30 },
+            dagger:     { type: 'melee', length: 25,  swingSpeed: 0.80, retractSpeed: 0.40, damage: 15 },
+            admin:      { type: 'ranged', length: 30,  fireRate: 8, projSpeed: 25, damage: 9999 } 
         };
+
+        // --- PROJECTILES ---
+        class Projectile {
+            constructor(x, y, angle, speed, damage, ownerId, color) {
+                this.x = x; this.y = y; this.angle = angle;
+                this.speed = speed; this.damage = damage; this.ownerId = ownerId;
+                this.color = color || "#FFF"; this.active = true;
+            }
+            update() {
+                this.x += Math.cos(this.angle) * this.speed;
+                this.y += Math.sin(this.angle) * this.speed;
+                if (this.x < -50 || this.x > canvas.width + 50 || this.y < -50 || this.y > canvas.height + 50) this.active = false;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 6, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                if(gameSettings.graphics === 'high') { ctx.shadowBlur = 15; ctx.shadowColor = this.color; }
+                ctx.fill(); ctx.shadowBlur = 0;
+            }
+        }
+        let projectiles = [];
 
         class Forklift {
             constructor(index, color, name) {
                 this.index = index; this.color = color; this.name = name;
-                this.active = false; 
-                this.swordTip = { x: 0, y: 0 };
+                this.active = false; this.swordTip = { x: 0, y: 0 };
                 this.setLoadout("standard", "standard");
             }
             setLoadout(chassisId, weaponId) {
@@ -307,22 +364,19 @@
                 this.health = this.stats.hp; this.speed = 0;
                 this.swordAngle = 0; this.isSwinging = false; this.hasHitThisSwing = false;
                 this.isBlocking = false; this.blockTimer = 0; this.blockCooldown = 0;
+                this.fireCooldown = 0;
                 this.updatePositions();
             }
             
-            // NEW UPDATED MOVE FUNCTION
             move(forward, turn) {
-                // Handle turning and acceleration
                 this.angle += turn * this.stats.turn;
                 if (forward !== 0) this.speed += forward * this.stats.acc; else this.speed *= 0.92; 
                 if (this.speed > this.stats.maxSpeed) this.speed = this.stats.maxSpeed;
                 if (this.speed < -this.stats.maxSpeed / 2) this.speed = -this.stats.maxSpeed / 2;
 
-                // Move the forklift
                 this.x += Math.cos(this.angle) * this.speed; 
                 this.y += Math.sin(this.angle) * this.speed;
                 
-                // Clamp coordinates to keep the forklift strictly inside the arena
                 const bounds = this.stats.w / 2;
                 let hitWall = false;
 
@@ -331,13 +385,29 @@
                 if (this.y < bounds) { this.y = bounds; hitWall = true; }
                 if (this.y > canvas.height - bounds) { this.y = canvas.height - bounds; hitWall = true; }
 
-                // Bounce off the wall if we hit it
                 if (hitWall) this.speed *= -0.5; 
             }
 
-            swing() { if (!this.isSwinging && this.swordAngle <= 0 && !this.isBlocking) { this.isSwinging = true; this.hasHitThisSwing = false; playSound('swing'); } }
+            swing() { 
+                if (this.weapon.type === 'ranged') {
+                    if (this.fireCooldown <= 0 && !this.isBlocking) {
+                        this.fireCooldown = this.weapon.fireRate;
+                        // Shoot projectile from the tip of the barrel
+                        let bulletColor = (this.weaponId === 'admin') ? '#FF00FF' : '#FFF';
+                        projectiles.push(new Projectile(this.swordTip.x, this.swordTip.y, this.angle, this.weapon.projSpeed, this.weapon.damage, this.index, bulletColor));
+                        playSound('shoot');
+                    }
+                } else {
+                    if (!this.isSwinging && this.swordAngle <= 0 && !this.isBlocking) { 
+                        this.isSwinging = true; this.hasHitThisSwing = false; playSound('swing'); 
+                    } 
+                }
+            }
+
             block() { if (!this.isSwinging && !this.isBlocking && this.blockCooldown === 0) { this.isBlocking = true; this.blockTimer = 15; this.blockCooldown = 60; playSound('block'); } }
+            
             updateAbilities() {
+                if (this.fireCooldown > 0) this.fireCooldown--;
                 if (this.isSwinging) { this.swordAngle += this.weapon.swingSpeed; if (this.swordAngle >= 2.0) this.isSwinging = false; } 
                 else if (this.swordAngle > 0) this.swordAngle -= this.weapon.retractSpeed; else this.swordAngle = 0;
                 if (this.isBlocking) { this.blockTimer--; if (this.blockTimer <= 0) this.isBlocking = false; }
@@ -348,14 +418,16 @@
                 const startOffset = this.stats.w / 2;
                 const swordStartX = this.x + Math.cos(this.angle) * startOffset;
                 const swordStartY = this.y + Math.sin(this.angle) * startOffset;
-                const totalSwordAngle = this.angle + this.swordAngle - 0.8; 
+                const totalSwordAngle = this.angle + this.swordAngle - (this.weapon.type === 'ranged' ? 0 : 0.8); 
                 this.swordTip.x = swordStartX + Math.cos(totalSwordAngle) * this.weapon.length;
                 this.swordTip.y = swordStartY + Math.sin(totalSwordAngle) * this.weapon.length;
             }
             draw() {
                 if (!this.active || this.health <= 0) return; 
                 ctx.save();
-                if (gameSettings.graphics === 'high') { ctx.shadowBlur = 15; ctx.shadowColor = this.color; } else { ctx.shadowBlur = 0; }
+                let glowColor = (this.chassisId === 'admin' || this.weaponId === 'admin') ? '#FF00FF' : this.color;
+                
+                if (gameSettings.graphics === 'high') { ctx.shadowBlur = 15; ctx.shadowColor = glowColor; } else { ctx.shadowBlur = 0; }
                 ctx.translate(this.x, this.y); ctx.rotate(this.angle);
                 ctx.fillStyle = this.color; ctx.fillRect(-this.stats.w/2, -this.stats.h/2, this.stats.w, this.stats.h);
                 ctx.fillStyle = "#000"; ctx.shadowBlur = 0; ctx.fillRect(-5, -10, 15, 20);
@@ -372,9 +444,10 @@
                 ctx.beginPath(); ctx.moveTo(this.x + Math.cos(this.angle) * startOffset, this.y + Math.sin(this.angle) * startOffset); ctx.lineTo(this.swordTip.x, this.swordTip.y);
                 
                 if(this.weaponId === 'lance') ctx.lineWidth = 12; else if(this.weaponId === 'greatsword') ctx.lineWidth = 9;
-                else if(this.weaponId === 'rapier' || this.weaponId === 'dagger') ctx.lineWidth = 3; else ctx.lineWidth = 6;
+                else if(this.weaponId === 'rapier' || this.weaponId === 'dagger') ctx.lineWidth = 3; 
+                else if(this.weaponId === 'admin') ctx.lineWidth = 8; else ctx.lineWidth = 6;
 
-                ctx.strokeStyle = this.isSwinging ? "#FFFFFF" : "#969696";
+                ctx.strokeStyle = this.isSwinging ? "#FFFFFF" : ((this.weaponId === 'admin') ? "#FF00FF" : "#969696");
                 if(gameSettings.graphics === 'high' && this.isSwinging) { ctx.shadowBlur = 10; ctx.shadowColor = "#FFFFFF"; }
                 ctx.stroke(); ctx.shadowBlur = 0; 
 
@@ -400,18 +473,15 @@
             new Forklift(3, "#32C832", "Player 4")
         ];
 
-        // NEW UPDATED RESIZE FUNCTION
         function resizeCanvas() {
             const container = document.getElementById("gameContainer");
-            // Subtracting padding to ensure it fits perfectly inside the view
-            canvas.width = container.clientWidth - 40; 
-            canvas.height = container.clientHeight - 20; 
+            canvas.width = container.clientWidth - 40; canvas.height = container.clientHeight - 20; 
         }
-        
         window.addEventListener("resize", resizeCanvas);
         resizeCanvas();
 
-        function checkCollision(attacker, defender) {
+        function checkMeleeCollision(attacker, defender) {
+            if (attacker.weapon.type !== 'melee') return;
             if (attacker.isSwinging && !attacker.hasHitThisSwing) {
                 const dx = attacker.swordTip.x - defender.x; const dy = attacker.swordTip.y - defender.y;
                 if (Math.sqrt(dx * dx + dy * dy) < (defender.stats.w / 2) + 15) { 
@@ -431,18 +501,19 @@
         function showScreen(screenId) {
             document.querySelectorAll('.screen-overlay').forEach(s => s.style.display = 'none');
             if(screenId) {
+                document.getElementById('inGameMenuBtn').style.display = 'none';
                 document.getElementById(screenId).style.display = 'flex';
                 gameState = "MENU";
                 if(screenId === 'hostScreen') startHostingLobby();
             } else {
+                document.getElementById('inGameMenuBtn').style.display = 'block';
                 gameState = "PLAYING";
                 if(!audioCtx && gameSettings.sfxEnabled) audioCtx = new AudioContext();
             }
         }
 
         // --- MULTIPLAYER NETWORKING ---
-        let peer = null, myConnection = null;
-        let clients = {}; 
+        let peer = null, myConnection = null, clients = {}; 
 
         function startHostingLobby() {
             gameMode = "HOST";
@@ -450,59 +521,34 @@
             players[0].active = true; 
             players[0].setLoadout(document.getElementById("myChassis").value, document.getElementById("myWeapon").value);
 
-            // Safely close and clear old lobby clients
             Object.values(clients).forEach(c => { if(c.conn) c.conn.close(); });
             clients = {};
-            
             for(let i=2; i<=4; i++) {
                 document.getElementById(`lobby-p${i}`).innerText = `Player ${i}: Waiting...`;
                 document.getElementById(`lobby-p${i}`).style.color = "#555";
             }
 
-            // Create Peer and Listeners ONLY ONCE so we don't break PeerJS's internal events
             if(!peer) {
                 peer = new Peer();
-                
-                peer.on('open', id => {
-                    document.getElementById('hostIdDisplay').value = id;
-                });
-
+                peer.on('open', id => { document.getElementById('hostIdDisplay').value = id; });
                 peer.on('connection', conn => {
                     conn.on('open', () => {
                         if (clients[conn.peer]) return;
-
                         let pIdx = -1;
-                        for (let i = 1; i <= 3; i++) {
-                            if (!Object.values(clients).some(c => c.index === i)) {
-                                pIdx = i;
-                                break;
-                            }
-                        }
-
+                        for (let i = 1; i <= 3; i++) { if (!Object.values(clients).some(c => c.index === i)) { pIdx = i; break; } }
                         if (gameState !== "MENU" || pIdx === -1) {
                             conn.send({ type: "ERROR", msg: "Lobby Full or Match Started!" });
-                            setTimeout(() => conn.close(), 500);
-                            return;
+                            setTimeout(() => conn.close(), 500); return;
                         }
                         
-                        clients[conn.peer] = { 
-                            index: pIdx, conn: conn, 
-                            inputs: { forward: 0, turn: 0, swing: false, block: false } 
-                        };
-                        
+                        clients[conn.peer] = { index: pIdx, conn: conn, inputs: { forward: 0, turn: 0, swing: false, block: false } };
                         document.getElementById(`lobby-p${pIdx+1}`).innerText = `Player ${pIdx+1}: Connected!`;
                         document.getElementById(`lobby-p${pIdx+1}`).style.color = players[pIdx].color;
 
                         conn.on('data', data => {
-                            if (data.type === 'LOADOUT') {
-                                players[pIdx].setLoadout(data.cId, data.wId);
-                                players[pIdx].active = true;
-                            }
-                            if (data.type === 'INPUT') {
-                                clients[conn.peer].inputs = data;
-                            }
+                            if (data.type === 'LOADOUT') { players[pIdx].setLoadout(data.cId, data.wId); players[pIdx].active = true; }
+                            if (data.type === 'INPUT') clients[conn.peer].inputs = data;
                         });
-
                         conn.on('close', () => {
                             players[pIdx].active = false;
                             document.getElementById(`lobby-p${pIdx+1}`).innerText = `Player ${pIdx+1}: Waiting...`;
@@ -511,16 +557,12 @@
                         });
                     });
                 });
-            } else {
-                // If peer already exists, just show the ID
-                document.getElementById('hostIdDisplay').value = peer.id;
-            }
+            } else { document.getElementById('hostIdDisplay').value = peer.id; }
         }
 
         function cancelHost() {
             Object.values(clients).forEach(c => { if(c.conn) c.conn.close(); });
             clients = {};
-            
             for(let i=2; i<=4; i++) {
                 document.getElementById(`lobby-p${i}`).innerText = `Player ${i}: Waiting...`;
                 document.getElementById(`lobby-p${i}`).style.color = "#555";
@@ -529,17 +571,14 @@
         }
 
         function startMultiplayerHost() {
-            players.forEach(p => p.reset()); 
+            players.forEach(p => p.reset()); projectiles = [];
             Object.values(clients).forEach(c => c.conn.send({ type: "START" }));
             showScreen(null);
         }
 
         function rejoinLastGame() {
             const savedHost = safeStorageGet('forkliftLastHostId');
-            if (savedHost) {
-                document.getElementById('joinIdInput').value = savedHost;
-                joinOnlineGame(savedHost);
-            }
+            if (savedHost) { document.getElementById('joinIdInput').value = savedHost; joinOnlineGame(savedHost); }
         }
 
         function joinOnlineGame(overrideId = null) {
@@ -549,35 +588,21 @@
             safeStorageSet('forkliftLastHostId', hostId);
             document.getElementById('rejoinBtn').style.display = 'block';
 
-            // Prevent ghost connections by clearing any old connection first
-            if (myConnection) {
-                myConnection.close();
-                myConnection = null;
-            }
+            if (myConnection) { myConnection.close(); myConnection = null; }
 
-            document.getElementById('joinStatus').innerText = "Connecting to Host...";
-            gameMode = "CLIENT";
+            document.getElementById('joinStatus').innerText = "Connecting to Host..."; gameMode = "CLIENT";
             
             const connectToHost = () => {
                 myConnection = peer.connect(hostId, { reliable: true });
-                
                 myConnection.on('open', () => {
                     document.getElementById('joinStatus').innerText = "Connected! Waiting for Host...";
-                    myConnection.send({ 
-                        type: 'LOADOUT', 
-                        cId: document.getElementById("myChassis").value, 
-                        wId: document.getElementById("myWeapon").value 
-                    });
+                    myConnection.send({ type: 'LOADOUT', cId: document.getElementById("myChassis").value, wId: document.getElementById("myWeapon").value });
                 });
 
                 myConnection.on('data', data => {
-                    if (data.type === "START") {
-                        showScreen(null);
-                    } else if (data.type === "STATE") {
-                        applyNetworkState(data.state);
-                    } else if (data.type === "ERROR") {
-                        document.getElementById('joinStatus').innerText = data.msg;
-                    }
+                    if (data.type === "START") { projectiles = []; showScreen(null); }
+                    else if (data.type === "STATE") applyNetworkState(data.state, data.projs);
+                    else if (data.type === "ERROR") document.getElementById('joinStatus').innerText = data.msg;
                 });
 
                 myConnection.on('close', () => {
@@ -587,6 +612,7 @@
                         document.getElementById("winnerText").innerText = "Host Disconnected!";
                         document.getElementById("winnerText").style.color = "#C83232";
                         document.getElementById("gameOverScreen").style.display = "flex";
+                        document.getElementById("inGameMenuBtn").style.display = "none";
                     }
                 });
             };
@@ -594,17 +620,13 @@
             if(!peer) {
                 peer = new Peer();
                 peer.on('open', connectToHost);
-                peer.on('error', err => {
-                    document.getElementById('joinStatus').innerText = "Network Error: " + err.type;
-                });
-            } else {
-                connectToHost();
-            }
+                peer.on('error', err => { document.getElementById('joinStatus').innerText = "Network Error: " + err.type; });
+            } else { connectToHost(); }
         }
 
         function startOfflineGame() {
             gameMode = document.getElementById('offlineModeSelect').value;
-            players.forEach(p => p.active = false);
+            players.forEach(p => p.active = false); projectiles = [];
             players[0].active = true; players[1].active = true;
             players[0].setLoadout(document.getElementById("myChassis").value, document.getElementById("myWeapon").value);
             players[1].setLoadout("standard", "standard"); 
@@ -612,39 +634,40 @@
             showScreen(null);
         }
 
+        function quitToMenu() {
+            gameState = "MENU";
+            if (gameMode === "HOST") cancelHost();
+            if (gameMode === "CLIENT" && myConnection) { myConnection.close(); myConnection = null; }
+            showScreen('mainMenuScreen');
+        }
+
         function endGame(winnerName, winnerColor) {
             gameState = "GAMEOVER";
             document.getElementById("winnerText").innerText = winnerName + " Wins!";
             document.getElementById("winnerText").style.color = winnerColor;
             document.getElementById("gameOverScreen").style.display = "flex";
+            document.getElementById("inGameMenuBtn").style.display = "none"; 
         }
 
         function quickRejoin() {
             document.getElementById("gameOverScreen").style.display = "none";
-            
-            if (gameMode === "HOST") {
-                showScreen('hostScreen');
-            } 
-            else if (gameMode === "CLIENT") {
-                showScreen('joinScreen');
-                rejoinLastGame();
-            } 
-            else {
-                startOfflineGame();
-            }
+            if (gameMode === "HOST") showScreen('hostScreen');
+            else if (gameMode === "CLIENT") { showScreen('joinScreen'); rejoinLastGame(); } 
+            else startOfflineGame();
         }
 
-        function applyNetworkState(stateArray) {
-            let activeCount = 0;
-            let lastAlive = null;
-
+        function applyNetworkState(stateArray, projsArray) {
+            let activeCount = 0; let lastAlive = null;
             for(let i=0; i<4; i++) {
                 players[i].setState(stateArray[i]);
-                if(players[i].active && players[i].health > 0) {
-                    activeCount++;
-                    lastAlive = players[i];
-                }
+                if(players[i].active && players[i].health > 0) { activeCount++; lastAlive = players[i]; }
             }
+            
+            // Rebuild dummy projectiles from host data for rendering
+            if (projsArray) {
+                projectiles = projsArray.map(p => new Projectile(p.x, p.y, 0, 0, 0, -1, p.color));
+            }
+
             if (activeCount <= 1 && lastAlive) endGame(lastAlive.name, lastAlive.color);
         }
 
@@ -700,11 +723,25 @@
                     
                     players.forEach(p => { if(p.active) p.updateAbilities(); });
 
+                    // Physics Updates
+                    projectiles.forEach(proj => {
+                        proj.update();
+                        players.forEach(p => {
+                            if (p.active && p.health > 0 && p.index !== proj.ownerId && proj.active) {
+                                let dx = proj.x - p.x; let dy = proj.y - p.y;
+                                if (Math.sqrt(dx*dx + dy*dy) < (p.stats.w / 2) + 10) {
+                                    if (p.isBlocking) { playSound('block'); p.speed = 0; p.x += Math.cos(proj.angle) * 5; p.y += Math.sin(proj.angle) * 5; } 
+                                    else { playSound('hit'); p.health -= proj.damage; p.speed = 0; p.x += Math.cos(proj.angle) * 20; p.y += Math.sin(proj.angle) * 20; }
+                                    proj.active = false;
+                                }
+                            }
+                        });
+                    });
+                    projectiles = projectiles.filter(p => p.active);
+
                     for (let i = 0; i < players.length; i++) {
                         for (let j = 0; j < players.length; j++) {
-                            if (i !== j && players[i].active && players[j].active && players[i].health > 0 && players[j].health > 0) {
-                                checkCollision(players[i], players[j]);
-                            }
+                            if (i !== j && players[i].active && players[j].active && players[i].health > 0 && players[j].health > 0) checkMeleeCollision(players[i], players[j]);
                         }
                     }
 
@@ -712,10 +749,9 @@
                     
                     if (gameMode === "HOST") {
                         let statePack = players.map(p => p.getState());
+                        let projsPack = projectiles.map(p => ({x: p.x, y: p.y, color: p.color}));
                         Object.values(clients).forEach(c => {
-                            if (c.conn && c.conn.open) {
-                                c.conn.send({ type: "STATE", state: statePack });
-                            }
+                            if (c.conn && c.conn.open) c.conn.send({ type: "STATE", state: statePack, projs: projsPack });
                         });
                     }
 
@@ -738,6 +774,7 @@
             }
 
             players.forEach(p => p.draw());
+            projectiles.forEach(p => p.draw());
             
             animationFrameId = requestAnimationFrame(gameLoop);
         }
