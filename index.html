@@ -38,9 +38,6 @@
         .keybind-btn.listening { background: #C83232; animation: pulse 1s infinite; }
         
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
-
-        .controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; padding: 15px; background: #1a1a1a; border-top: 2px solid #333; }
-        .player-card { background: #111; padding: 10px 20px; border-radius: 8px; border: 2px solid; width: 200px; text-align: left; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -80,9 +77,9 @@
             <div class="flex-container">
                 <div class="loadout-box" style="border-color: #FFF;">
                     <h3 style="color: #FFF; margin: 0 0 10px 0;">System</h3>
-                    <label>Graphics Quality:</label><select id="gfxSelect" onchange="gameSettings.graphics = this.value"><option value="high">High (Neon Glow)</option><option value="low">Low (Flat & Fast)</option></select>
-                    <label style="margin-top: 10px;">SFX Status:</label><select id="sfxSelect" onchange="gameSettings.sfxEnabled = (this.value === 'on')"><option value="on">Enabled</option><option value="off">Disabled</option></select>
-                    <label style="margin-top: 10px;">SFX Volume:</label><input type="range" min="0" max="1" step="0.1" value="0.5" onchange="gameSettings.sfxVolume = parseFloat(this.value)">
+                    <label>Graphics Quality:</label><select id="gfxSelect" onchange="updateSetting('graphics', this.value)"><option value="high">High (Neon Glow)</option><option value="low">Low (Flat & Fast)</option></select>
+                    <label style="margin-top: 10px;">SFX Status:</label><select id="sfxSelect" onchange="updateSetting('sfxEnabled', this.value === 'on')"><option value="on">Enabled</option><option value="off">Disabled</option></select>
+                    <label style="margin-top: 10px;">SFX Volume:</label><input type="range" id="sfxVolume" min="0" max="1" step="0.1" value="0.5" onchange="updateSetting('sfxVolume', parseFloat(this.value))">
                 </div>
                 <div class="loadout-box" style="border-color: #FFD700;">
                     <h3 style="color: #FFD700; margin: 0 0 10px 0;">Primary Controls</h3>
@@ -112,8 +109,8 @@
                 <div class="loadout-box" style="border-color: #FFD700;">
                     <h3 style="color: #FFF; margin: 0 0 10px 0;">Your Loadout</h3>
                     <p style="color: #AAA; font-size: 14px; margin-top: 0;">Sent to Host when joining online.</p>
-                    <label>Chassis Type:</label><select id="myChassis"><option value="standard">Standard</option><option value="bulldozer">Bulldozer</option><option value="speedster">Speedster</option><option value="tank">Tank</option><option value="drifter">Drifter</option></select>
-                    <label>Weapon Type:</label><select id="myWeapon"><option value="standard">Standard Fork</option><option value="greatsword">Greatsword</option><option value="rapier">Rapier</option><option value="lance">Lance</option><option value="dagger">Dagger</option></select>
+                    <label>Chassis Type:</label><select id="myChassis" onchange="saveLoadout()"><option value="standard">Standard</option><option value="bulldozer">Bulldozer</option><option value="speedster">Speedster</option><option value="tank">Tank</option><option value="drifter">Drifter</option></select>
+                    <label>Weapon Type:</label><select id="myWeapon" onchange="saveLoadout()"><option value="standard">Standard Fork</option><option value="greatsword">Greatsword</option><option value="rapier">Rapier</option><option value="lance">Lance</option><option value="dagger">Dagger</option></select>
                 </div>
             </div>
             <button class="menu-btn back-btn" onclick="showScreen('mainMenuScreen')">Back to Menu</button>
@@ -160,16 +157,6 @@
         </div>
     </div>
 
-    <div class="controls">
-        <div class="player-card" style="border-color: #FFF;">
-            <h3 style="color: #FFF; margin: 0 0 10px 0; text-align: center;">Your Controls</h3>
-            <p style="margin: 5px 0;"><strong>Fwd/Rev:</strong> <span id="disp-p1-up">W</span> / <span id="disp-p1-down">S</span></p>
-            <p style="margin: 5px 0;"><strong>Turn:</strong> <span id="disp-p1-left">A</span> / <span id="disp-p1-right">D</span></p>
-            <p style="margin: 5px 0;"><strong>Swing:</strong> <span id="disp-p1-swing">Space</span></p>
-            <p style="margin: 5px 0; color: #00FFFF;"><strong>Parry:</strong> <span id="disp-p1-block">E</span></p>
-        </div>
-    </div>
-
     <script>
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
@@ -178,20 +165,56 @@
         let gameMode = "LOCAL"; 
         let animationFrameId;
 
-        // Check for last saved Host ID on page load
-        window.addEventListener('load', () => {
-            const savedHost = localStorage.getItem('forkliftLastHostId');
-            if (savedHost) {
-                document.getElementById('rejoinBtn').style.display = 'block';
-            }
-        });
-
         // --- SETTINGS & KEYBINDS ---
-        const gameSettings = { graphics: 'high', sfxEnabled: true, sfxVolume: 0.5 };
-        const keyBinds = {
+        let gameSettings = { graphics: 'high', sfxEnabled: true, sfxVolume: 0.5 };
+        let keyBinds = {
             p1: { up: 'KeyW', down: 'KeyS', left: 'KeyA', right: 'KeyD', swing: 'Space', block: 'KeyE' },
             p2: { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight', swing: 'ShiftRight', block: 'Slash' }
         };
+
+        // Load saved data on page load
+        window.addEventListener('load', () => {
+            // Rejoin button
+            const savedHost = localStorage.getItem('forkliftLastHostId');
+            if (savedHost) document.getElementById('rejoinBtn').style.display = 'block';
+
+            // Loadout
+            const savedChassis = localStorage.getItem('forkliftChassis');
+            if (savedChassis) document.getElementById('myChassis').value = savedChassis;
+            const savedWeapon = localStorage.getItem('forkliftWeapon');
+            if (savedWeapon) document.getElementById('myWeapon').value = savedWeapon;
+
+            // Settings
+            const savedSettings = localStorage.getItem('forkliftSettings');
+            if (savedSettings) {
+                gameSettings = JSON.parse(savedSettings);
+                document.getElementById('gfxSelect').value = gameSettings.graphics;
+                document.getElementById('sfxSelect').value = gameSettings.sfxEnabled ? 'on' : 'off';
+                document.getElementById('sfxVolume').value = gameSettings.sfxVolume;
+            }
+
+            // Keybinds
+            const savedBinds = localStorage.getItem('forkliftBinds');
+            if (savedBinds) {
+                keyBinds = JSON.parse(savedBinds);
+                ['p1', 'p2'].forEach(p => {
+                    ['up', 'down', 'left', 'right', 'swing', 'block'].forEach(a => {
+                        const btn = document.getElementById(`kb-${p}-${a}`);
+                        if (btn) btn.innerText = keyBinds[p][a];
+                    });
+                });
+            }
+        });
+
+        function updateSetting(key, value) {
+            gameSettings[key] = value;
+            localStorage.setItem('forkliftSettings', JSON.stringify(gameSettings));
+        }
+
+        function saveLoadout() {
+            localStorage.setItem('forkliftChassis', document.getElementById("myChassis").value);
+            localStorage.setItem('forkliftWeapon', document.getElementById("myWeapon").value);
+        }
 
         const keys = {};
         let rebindingTarget = null;
@@ -202,7 +225,9 @@
                 keyBinds[rebindingTarget.player][rebindingTarget.action] = e.code;
                 rebindingTarget.btn.innerText = e.code;
                 rebindingTarget.btn.classList.remove('listening');
-                updateControlDisplay(); rebindingTarget = null; return;
+                localStorage.setItem('forkliftBinds', JSON.stringify(keyBinds)); // Save new bind
+                rebindingTarget = null; 
+                return;
             }
             keys[e.code] = true;
         });
@@ -213,14 +238,6 @@
             rebindingTarget = { player, action, btn: btnElement };
             btnElement.innerText = "Press Key..."; btnElement.classList.add('listening');
         }
-
-        function updateControlDisplay() {
-            const formatKey = k => k.replace('Key', '').replace('Arrow', '').replace('Right', 'R').replace('Left', 'L');
-            ['up', 'down', 'left', 'right', 'swing', 'block'].forEach(a => {
-                document.getElementById(`disp-p1-${a}`).innerText = formatKey(keyBinds.p1[a]);
-            });
-        }
-        updateControlDisplay();
 
         // --- AUDIO ---
         const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -412,7 +429,6 @@
             players[0].active = true; 
             players[0].setLoadout(document.getElementById("myChassis").value, document.getElementById("myWeapon").value);
 
-            // Wipe the lobby completely clean every time you hit "Host"
             Object.values(clients).forEach(c => c.conn.close());
             clients = {};
             
@@ -432,10 +448,8 @@
             
             peer.on('connection', conn => {
                 conn.on('open', () => {
-                    // Block duplicate background connections from the same person/tab
                     if (clients[conn.peer]) return;
 
-                    // Find the actual first empty slot
                     let pIdx = -1;
                     for (let i = 1; i <= 3; i++) {
                         if (!Object.values(clients).some(c => c.index === i)) {
@@ -472,8 +486,6 @@
                         players[pIdx].active = false;
                         document.getElementById(`lobby-p${pIdx+1}`).innerText = `Player ${pIdx+1}: Waiting...`;
                         document.getElementById(`lobby-p${pIdx+1}`).style.color = "#555";
-                        
-                        // Delete the client data so their slot actually empties out
                         delete clients[conn.peer]; 
                     });
                 });
@@ -540,7 +552,6 @@
                 myConnection.on('close', () => {
                     document.getElementById('joinStatus').innerText = "Host closed the connection.";
                     if (gameState === "PLAYING") {
-                        // Kick players to the game over screen if the host drops mid-match
                         gameState = "GAMEOVER";
                         document.getElementById("winnerText").innerText = "Host Disconnected!";
                         document.getElementById("winnerText").style.color = "#C83232";
@@ -581,16 +592,13 @@
             document.getElementById("gameOverScreen").style.display = "none";
             
             if (gameMode === "HOST") {
-                // If you are the host, reopen the lobby using your existing ID
                 showScreen('hostScreen');
             } 
             else if (gameMode === "CLIENT") {
-                // If you are a client, jump to the join screen and auto-reconnect
                 showScreen('joinScreen');
                 rejoinLastGame();
             } 
             else {
-                // If you were playing offline/AI, just instantly restart
                 startOfflineGame();
             }
         }
