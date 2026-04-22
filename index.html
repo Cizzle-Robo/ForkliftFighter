@@ -23,7 +23,6 @@
         .menu-btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .back-btn { background: #222; margin-top: 30px; width: 200px; font-size: 16px; }
         
-        /* IN-GAME QUIT BUTTON */
         #inGameMenuBtn { position: absolute; top: 15px; left: 35px; padding: 8px 15px; font-size: 14px; background: #C83232; border-color: #FF0000; display: none; z-index: 5; }
         #inGameMenuBtn:hover { background: #FF0000; color: #FFF; border-color: #FFF; }
 
@@ -55,12 +54,23 @@
         
         <div id="mainMenuScreen" class="screen-overlay">
             <h1>Warehouse Warfare</h1>
+            <div style="display: flex; flex-direction: column; gap: 20px; align-items: center;">
+                <button class="menu-btn" style="width: 250px; font-size: 24px;" onclick="showScreen('playScreen')">Play</button>
+                <button class="menu-btn" style="width: 250px; font-size: 24px;" onclick="showScreen('garageScreen')">The Garage</button>
+                <button class="menu-btn" style="width: 250px; font-size: 24px;" onclick="showScreen('settingsScreen')">Settings</button>
+            </div>
+        </div>
+
+        <div id="playScreen" class="screen-overlay">
+            <h2 class="screen-title">Select Mode</h2>
             <div class="menu-row">
                 <div class="menu-box">
                     <h3 style="color: #FFD700; margin: 0;">Offline Play</h3>
                     <select id="offlineModeSelect">
                         <option value="LOCAL">Opponent: Player 2 (Local)</option>
-                        <option value="AI">Opponent: AI (Singleplayer)</option>
+                        <option value="AI_EASY">Opponent: AI (Trainee)</option>
+                        <option value="AI_MED">Opponent: AI (Journeyman)</option>
+                        <option value="AI_HARD">Opponent: AI (OSHA Boss)</option>
                     </select>
                     <button class="menu-btn" style="width: 100%;" onclick="startOfflineGame()">Start Match</button>
                 </div>
@@ -72,10 +82,7 @@
                     </div>
                 </div>
             </div>
-            <div class="menu-row" style="margin-top: 20px;">
-                <button class="menu-btn" style="background: #333; border-color: #555; width: 250px;" onclick="showScreen('garageScreen')">The Garage</button>
-                <button class="menu-btn" style="background: #333; border-color: #555; width: 250px;" onclick="showScreen('settingsScreen')">Settings</button>
-            </div>
+            <button class="menu-btn back-btn" onclick="showScreen('mainMenuScreen')">Back to Menu</button>
         </div>
 
         <div id="settingsScreen" class="screen-overlay">
@@ -116,26 +123,49 @@
             <h2 class="screen-title">The Garage</h2>
             <div class="flex-container">
                 <div class="loadout-box" style="border-color: #FFD700;">
-                    <h3 style="color: #FFF; margin: 0 0 10px 0;">Your Loadout</h3>
+                    <h3 style="color: #FFD700; margin: 0 0 10px 0;">Player 1 (Host/You)</h3>
                     <p style="color: #AAA; font-size: 14px; margin-top: 0;">Sent to Host when joining online.</p>
                     <label>Chassis Type:</label>
-                    <select id="myChassis" onchange="saveLoadout()">
+                    <select id="p1Chassis" onchange="saveLoadout()">
                         <option value="standard">Standard</option>
                         <option value="bulldozer">Bulldozer</option>
                         <option value="speedster">Speedster</option>
                         <option value="tank">Tank</option>
                         <option value="drifter">Drifter</option>
-                        <option id="opt-admin-chassis" value="admin" style="color: #FF00FF; font-weight: bold;" hidden>Admin Forklift</option>
+                        <option class="opt-admin" value="admin" style="color: #FF00FF; font-weight: bold;" hidden>Admin Forklift</option>
                     </select>
                     
                     <label>Weapon Type:</label>
-                    <select id="myWeapon" onchange="saveLoadout()">
+                    <select id="p1Weapon" onchange="saveLoadout()">
                         <option value="standard">Standard Fork</option>
                         <option value="greatsword">Greatsword</option>
                         <option value="rapier">Rapier</option>
                         <option value="lance">Lance</option>
                         <option value="dagger">Dagger</option>
-                        <option id="opt-admin-weapon" value="admin" style="color: #FF00FF; font-weight: bold;" hidden>Admin Gun</option>
+                        <option class="opt-admin" value="admin" style="color: #FF00FF; font-weight: bold;" hidden>Admin Gun</option>
+                    </select>
+                </div>
+                <div class="loadout-box" style="border-color: #C83232;">
+                    <h3 style="color: #C83232; margin: 0 0 10px 0;">Player 2 (Local)</h3>
+                    <p style="color: #AAA; font-size: 14px; margin-top: 0;">Used for Offline & AI play.</p>
+                    <label>Chassis Type:</label>
+                    <select id="p2Chassis" onchange="saveLoadout()">
+                        <option value="standard">Standard</option>
+                        <option value="bulldozer">Bulldozer</option>
+                        <option value="speedster">Speedster</option>
+                        <option value="tank">Tank</option>
+                        <option value="drifter">Drifter</option>
+                        <option class="opt-admin" value="admin" style="color: #FF00FF; font-weight: bold;" hidden>Admin Forklift</option>
+                    </select>
+                    
+                    <label>Weapon Type:</label>
+                    <select id="p2Weapon" onchange="saveLoadout()">
+                        <option value="standard">Standard Fork</option>
+                        <option value="greatsword">Greatsword</option>
+                        <option value="rapier">Rapier</option>
+                        <option value="lance">Lance</option>
+                        <option value="dagger">Dagger</option>
+                        <option class="opt-admin" value="admin" style="color: #FF00FF; font-weight: bold;" hidden>Admin Gun</option>
                     </select>
                 </div>
             </div>
@@ -168,7 +198,7 @@
                 <button id="rejoinBtn" class="menu-btn" style="width: 100%; margin-top: 10px; background: #3264C8; display: none;" onclick="rejoinLastGame()">Rejoin Last Host</button>
                 <p id="joinStatus" style="color: #FFD700; margin: 0;"></p>
             </div>
-            <button class="menu-btn back-btn" onclick="showScreen('mainMenuScreen')">Cancel</button>
+            <button class="menu-btn back-btn" onclick="showScreen('playScreen')">Cancel</button>
         </div>
 
         <div id="gameOverScreen" class="screen-overlay">
@@ -193,7 +223,7 @@
         function safeStorageSet(key, value) { try { localStorage.setItem(key, value); } catch(e) {} }
         function safeStorageGet(key) { try { return localStorage.getItem(key); } catch(e) { return null; } }
 
-        // --- SETTINGS, KEYBINDS & SECRETS ---
+        // --- SETTINGS & KEYBINDS ---
         let gameSettings = { graphics: 'high', sfxEnabled: true, sfxVolume: 0.5 };
         let keyBinds = {
             p1: { up: 'KeyW', down: 'KeyS', left: 'KeyA', right: 'KeyD', swing: 'Space', block: 'KeyE' },
@@ -206,10 +236,10 @@
 
             if (safeStorageGet('forkliftAdminUnlocked') === 'true') unlockAdmin();
 
-            const savedChassis = safeStorageGet('forkliftChassis');
-            if (savedChassis) document.getElementById('myChassis').value = savedChassis;
-            const savedWeapon = safeStorageGet('forkliftWeapon');
-            if (savedWeapon) document.getElementById('myWeapon').value = savedWeapon;
+            const p1Chassis = safeStorageGet('forkliftP1Chassis'); if (p1Chassis) document.getElementById('p1Chassis').value = p1Chassis;
+            const p1Weapon = safeStorageGet('forkliftP1Weapon'); if (p1Weapon) document.getElementById('p1Weapon').value = p1Weapon;
+            const p2Chassis = safeStorageGet('forkliftP2Chassis'); if (p2Chassis) document.getElementById('p2Chassis').value = p2Chassis;
+            const p2Weapon = safeStorageGet('forkliftP2Weapon'); if (p2Weapon) document.getElementById('p2Weapon').value = p2Weapon;
 
             const savedSettings = safeStorageGet('forkliftSettings');
             if (savedSettings) {
@@ -231,27 +261,25 @@
             }
         });
 
-        // --- SECRET CODE LOGIC ---
         function checkSecretCode(val) {
             if (val.trim().toUpperCase() === "ROBO") {
-                safeStorageSet('forkliftAdminUnlocked', 'true');
-                unlockAdmin();
+                safeStorageSet('forkliftAdminUnlocked', 'true'); unlockAdmin();
                 const input = document.getElementById('secretCodeInput');
                 input.value = ""; input.placeholder = "ADMIN UNLOCKED!"; input.style.borderColor = "#FF00FF";
             }
         }
-
-        function unlockAdmin() {
-            document.getElementById('opt-admin-chassis').hidden = false;
-            document.getElementById('opt-admin-weapon').hidden = false;
-        }
-
+        function unlockAdmin() { document.querySelectorAll('.opt-admin').forEach(el => el.hidden = false); }
         function updateSetting(key, value) { gameSettings[key] = value; safeStorageSet('forkliftSettings', JSON.stringify(gameSettings)); }
-        function saveLoadout() { safeStorageSet('forkliftChassis', document.getElementById("myChassis").value); safeStorageSet('forkliftWeapon', document.getElementById("myWeapon").value); }
+        
+        function saveLoadout() { 
+            safeStorageSet('forkliftP1Chassis', document.getElementById("p1Chassis").value); 
+            safeStorageSet('forkliftP1Weapon', document.getElementById("p1Weapon").value); 
+            safeStorageSet('forkliftP2Chassis', document.getElementById("p2Chassis").value); 
+            safeStorageSet('forkliftP2Weapon', document.getElementById("p2Weapon").value); 
+        }
 
         const keys = {};
         let rebindingTarget = null;
-
         window.addEventListener("keydown", e => {
             if (rebindingTarget) {
                 e.preventDefault();
@@ -263,7 +291,6 @@
             keys[e.code] = true;
         });
         window.addEventListener("keyup", e => { if(!rebindingTarget) keys[e.code] = false; });
-
         function startRebind(player, action, btnElement) {
             if (rebindingTarget) rebindingTarget.btn.classList.remove('listening');
             rebindingTarget = { player, action, btn: btnElement };
@@ -282,22 +309,10 @@
             gain.gain.value = gameSettings.sfxVolume * 0.1; 
             const now = audioCtx.currentTime;
             
-            if (type === 'swing') {
-                osc.type = 'sine'; osc.frequency.setValueAtTime(400, now); osc.frequency.exponentialRampToValueAtTime(100, now + 0.15);
-                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15); osc.start(now); osc.stop(now + 0.15);
-            } else if (type === 'hit') {
-                osc.type = 'square'; osc.frequency.setValueAtTime(150, now); osc.frequency.exponentialRampToValueAtTime(50, now + 0.2);
-                gain.gain.setValueAtTime(gain.gain.value * 2, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-                osc.start(now); osc.stop(now + 0.2);
-            } else if (type === 'block') {
-                osc.type = 'triangle'; osc.frequency.setValueAtTime(800, now); osc.frequency.linearRampToValueAtTime(1200, now + 0.1);
-                gain.gain.setValueAtTime(gain.gain.value * 1.5, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-                osc.start(now); osc.stop(now + 0.1);
-            } else if (type === 'shoot') {
-                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(600, now); osc.frequency.exponentialRampToValueAtTime(100, now + 0.1);
-                gain.gain.setValueAtTime(gain.gain.value * 0.8, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-                osc.start(now); osc.stop(now + 0.1);
-            }
+            if (type === 'swing') { osc.type = 'sine'; osc.frequency.setValueAtTime(400, now); osc.frequency.exponentialRampToValueAtTime(100, now + 0.15); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15); osc.start(now); osc.stop(now + 0.15); } 
+            else if (type === 'hit') { osc.type = 'square'; osc.frequency.setValueAtTime(150, now); osc.frequency.exponentialRampToValueAtTime(50, now + 0.2); gain.gain.setValueAtTime(gain.gain.value * 2, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2); osc.start(now); osc.stop(now + 0.2); } 
+            else if (type === 'block') { osc.type = 'triangle'; osc.frequency.setValueAtTime(800, now); osc.frequency.linearRampToValueAtTime(1200, now + 0.1); gain.gain.setValueAtTime(gain.gain.value * 1.5, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1); osc.start(now); osc.stop(now + 0.1); } 
+            else if (type === 'shoot') { osc.type = 'sawtooth'; osc.frequency.setValueAtTime(600, now); osc.frequency.exponentialRampToValueAtTime(100, now + 0.1); gain.gain.setValueAtTime(gain.gain.value * 0.8, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1); osc.start(now); osc.stop(now + 0.1); }
         }
 
         // --- GAME DATABASES ---
@@ -318,25 +333,15 @@
             admin:      { type: 'ranged', length: 30,  fireRate: 8, projSpeed: 25, damage: 9999 } 
         };
 
-        // --- PROJECTILES ---
+        // --- PROJECTILES & FORKLIFT CLASSES ---
         class Projectile {
             constructor(x, y, angle, speed, damage, ownerId, color) {
                 this.x = x; this.y = y; this.angle = angle;
                 this.speed = speed; this.damage = damage; this.ownerId = ownerId;
                 this.color = color || "#FFF"; this.active = true;
             }
-            update() {
-                this.x += Math.cos(this.angle) * this.speed;
-                this.y += Math.sin(this.angle) * this.speed;
-                if (this.x < -50 || this.x > canvas.width + 50 || this.y < -50 || this.y > canvas.height + 50) this.active = false;
-            }
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, 6, 0, Math.PI * 2);
-                ctx.fillStyle = this.color;
-                if(gameSettings.graphics === 'high') { ctx.shadowBlur = 15; ctx.shadowColor = this.color; }
-                ctx.fill(); ctx.shadowBlur = 0;
-            }
+            update() { this.x += Math.cos(this.angle) * this.speed; this.y += Math.sin(this.angle) * this.speed; if (this.x < -50 || this.x > canvas.width + 50 || this.y < -50 || this.y > canvas.height + 50) this.active = false; }
+            draw() { ctx.beginPath(); ctx.arc(this.x, this.y, 6, 0, Math.PI * 2); ctx.fillStyle = this.color; if(gameSettings.graphics === 'high') { ctx.shadowBlur = 15; ctx.shadowColor = this.color; } ctx.fill(); ctx.shadowBlur = 0; }
         }
         let projectiles = [];
 
@@ -344,68 +349,38 @@
             constructor(index, color, name) {
                 this.index = index; this.color = color; this.name = name;
                 this.active = false; this.swordTip = { x: 0, y: 0 };
+                this.aiTimer = 0; this.hasRolledParry = false;
                 this.setLoadout("standard", "standard");
             }
-            setLoadout(chassisId, weaponId) {
-                this.chassisId = chassisId; this.weaponId = weaponId;
-                this.stats = CHASSIS_DB[chassisId] || CHASSIS_DB["standard"];
-                this.weapon = WEAPON_DB[weaponId] || WEAPON_DB["standard"];
-                this.reset();
-            }
+            setLoadout(chassisId, weaponId) { this.chassisId = chassisId; this.weaponId = weaponId; this.stats = CHASSIS_DB[chassisId] || CHASSIS_DB["standard"]; this.weapon = WEAPON_DB[weaponId] || WEAPON_DB["standard"]; this.reset(); }
             reset() {
-                const spawnPoints = [
-                    { x: canvas.width * 0.1, y: canvas.height * 0.2, a: 0 },
-                    { x: canvas.width * 0.9, y: canvas.height * 0.8, a: Math.PI },
-                    { x: canvas.width * 0.9, y: canvas.height * 0.2, a: Math.PI/2 },
-                    { x: canvas.width * 0.1, y: canvas.height * 0.8, a: -Math.PI/2 }
-                ];
+                const spawnPoints = [ { x: canvas.width * 0.1, y: canvas.height * 0.2, a: 0 }, { x: canvas.width * 0.9, y: canvas.height * 0.8, a: Math.PI }, { x: canvas.width * 0.9, y: canvas.height * 0.2, a: Math.PI/2 }, { x: canvas.width * 0.1, y: canvas.height * 0.8, a: -Math.PI/2 } ];
                 let spawn = spawnPoints[this.index] || spawnPoints[0];
-                this.x = spawn.x; this.y = spawn.y; this.angle = spawn.a;
-                this.health = this.stats.hp; this.speed = 0;
-                this.swordAngle = 0; this.isSwinging = false; this.hasHitThisSwing = false;
-                this.isBlocking = false; this.blockTimer = 0; this.blockCooldown = 0;
-                this.fireCooldown = 0;
+                this.x = spawn.x; this.y = spawn.y; this.angle = spawn.a; this.health = this.stats.hp; this.speed = 0;
+                this.swordAngle = 0; this.isSwinging = false; this.hasHitThisSwing = false; this.isBlocking = false; this.blockTimer = 0; this.blockCooldown = 0; this.fireCooldown = 0;
+                this.aiTimer = 0; this.hasRolledParry = false;
                 this.updatePositions();
             }
-            
             move(forward, turn) {
                 this.angle += turn * this.stats.turn;
                 if (forward !== 0) this.speed += forward * this.stats.acc; else this.speed *= 0.92; 
                 if (this.speed > this.stats.maxSpeed) this.speed = this.stats.maxSpeed;
                 if (this.speed < -this.stats.maxSpeed / 2) this.speed = -this.stats.maxSpeed / 2;
-
-                this.x += Math.cos(this.angle) * this.speed; 
-                this.y += Math.sin(this.angle) * this.speed;
-                
-                const bounds = this.stats.w / 2;
-                let hitWall = false;
-
-                if (this.x < bounds) { this.x = bounds; hitWall = true; }
-                if (this.x > canvas.width - bounds) { this.x = canvas.width - bounds; hitWall = true; }
-                if (this.y < bounds) { this.y = bounds; hitWall = true; }
-                if (this.y > canvas.height - bounds) { this.y = canvas.height - bounds; hitWall = true; }
-
+                this.x += Math.cos(this.angle) * this.speed; this.y += Math.sin(this.angle) * this.speed;
+                const bounds = this.stats.w / 2; let hitWall = false;
+                if (this.x < bounds) { this.x = bounds; hitWall = true; } if (this.x > canvas.width - bounds) { this.x = canvas.width - bounds; hitWall = true; }
+                if (this.y < bounds) { this.y = bounds; hitWall = true; } if (this.y > canvas.height - bounds) { this.y = canvas.height - bounds; hitWall = true; }
                 if (hitWall) this.speed *= -0.5; 
             }
-
             swing() { 
                 if (this.weapon.type === 'ranged') {
                     if (this.fireCooldown <= 0 && !this.isBlocking) {
-                        this.fireCooldown = this.weapon.fireRate;
-                        // Shoot projectile from the tip of the barrel
-                        let bulletColor = (this.weaponId === 'admin') ? '#FF00FF' : '#FFF';
-                        projectiles.push(new Projectile(this.swordTip.x, this.swordTip.y, this.angle, this.weapon.projSpeed, this.weapon.damage, this.index, bulletColor));
-                        playSound('shoot');
+                        this.fireCooldown = this.weapon.fireRate; let bulletColor = (this.weaponId === 'admin') ? '#FF00FF' : '#FFF';
+                        projectiles.push(new Projectile(this.swordTip.x, this.swordTip.y, this.angle, this.weapon.projSpeed, this.weapon.damage, this.index, bulletColor)); playSound('shoot');
                     }
-                } else {
-                    if (!this.isSwinging && this.swordAngle <= 0 && !this.isBlocking) { 
-                        this.isSwinging = true; this.hasHitThisSwing = false; playSound('swing'); 
-                    } 
-                }
+                } else { if (!this.isSwinging && this.swordAngle <= 0 && !this.isBlocking) { this.isSwinging = true; this.hasHitThisSwing = false; playSound('swing'); } }
             }
-
             block() { if (!this.isSwinging && !this.isBlocking && this.blockCooldown === 0) { this.isBlocking = true; this.blockTimer = 15; this.blockCooldown = 60; playSound('block'); } }
-            
             updateAbilities() {
                 if (this.fireCooldown > 0) this.fireCooldown--;
                 if (this.isSwinging) { this.swordAngle += this.weapon.swingSpeed; if (this.swordAngle >= 2.0) this.isSwinging = false; } 
@@ -416,220 +391,119 @@
             }
             updatePositions() {
                 const startOffset = this.stats.w / 2;
-                const swordStartX = this.x + Math.cos(this.angle) * startOffset;
-                const swordStartY = this.y + Math.sin(this.angle) * startOffset;
+                const swordStartX = this.x + Math.cos(this.angle) * startOffset; const swordStartY = this.y + Math.sin(this.angle) * startOffset;
                 const totalSwordAngle = this.angle + this.swordAngle - (this.weapon.type === 'ranged' ? 0 : 0.8); 
-                this.swordTip.x = swordStartX + Math.cos(totalSwordAngle) * this.weapon.length;
-                this.swordTip.y = swordStartY + Math.sin(totalSwordAngle) * this.weapon.length;
+                this.swordTip.x = swordStartX + Math.cos(totalSwordAngle) * this.weapon.length; this.swordTip.y = swordStartY + Math.sin(totalSwordAngle) * this.weapon.length;
             }
             draw() {
-                if (!this.active || this.health <= 0) return; 
-                ctx.save();
+                if (!this.active || this.health <= 0) return; ctx.save();
                 let glowColor = (this.chassisId === 'admin' || this.weaponId === 'admin') ? '#FF00FF' : this.color;
-                
                 if (gameSettings.graphics === 'high') { ctx.shadowBlur = 15; ctx.shadowColor = glowColor; } else { ctx.shadowBlur = 0; }
                 ctx.translate(this.x, this.y); ctx.rotate(this.angle);
                 ctx.fillStyle = this.color; ctx.fillRect(-this.stats.w/2, -this.stats.h/2, this.stats.w, this.stats.h);
                 ctx.fillStyle = "#000"; ctx.shadowBlur = 0; ctx.fillRect(-5, -10, 15, 20);
-
                 if (this.isBlocking) {
-                    ctx.beginPath(); ctx.arc(0, 0, this.stats.w/2 + 15, -Math.PI/2, Math.PI/2);
-                    ctx.strokeStyle = "#00FFFF"; ctx.lineWidth = 4;
-                    if(gameSettings.graphics === 'high') { ctx.shadowBlur = 20; ctx.shadowColor = "#00FFFF"; }
-                    ctx.stroke();
-                }
-                ctx.restore();
-
+                    ctx.beginPath(); ctx.arc(0, 0, this.stats.w/2 + 15, -Math.PI/2, Math.PI/2); ctx.strokeStyle = "#00FFFF"; ctx.lineWidth = 4;
+                    if(gameSettings.graphics === 'high') { ctx.shadowBlur = 20; ctx.shadowColor = "#00FFFF"; } ctx.stroke();
+                } ctx.restore();
                 const startOffset = this.stats.w / 2;
                 ctx.beginPath(); ctx.moveTo(this.x + Math.cos(this.angle) * startOffset, this.y + Math.sin(this.angle) * startOffset); ctx.lineTo(this.swordTip.x, this.swordTip.y);
-                
-                if(this.weaponId === 'lance') ctx.lineWidth = 12; else if(this.weaponId === 'greatsword') ctx.lineWidth = 9;
-                else if(this.weaponId === 'rapier' || this.weaponId === 'dagger') ctx.lineWidth = 3; 
-                else if(this.weaponId === 'admin') ctx.lineWidth = 8; else ctx.lineWidth = 6;
-
+                if(this.weaponId === 'lance') ctx.lineWidth = 12; else if(this.weaponId === 'greatsword') ctx.lineWidth = 9; else if(this.weaponId === 'rapier' || this.weaponId === 'dagger') ctx.lineWidth = 3; else if(this.weaponId === 'admin') ctx.lineWidth = 8; else ctx.lineWidth = 6;
                 ctx.strokeStyle = this.isSwinging ? "#FFFFFF" : ((this.weaponId === 'admin') ? "#FF00FF" : "#969696");
-                if(gameSettings.graphics === 'high' && this.isSwinging) { ctx.shadowBlur = 10; ctx.shadowColor = "#FFFFFF"; }
-                ctx.stroke(); ctx.shadowBlur = 0; 
-
+                if(gameSettings.graphics === 'high' && this.isSwinging) { ctx.shadowBlur = 10; ctx.shadowColor = "#FFFFFF"; } ctx.stroke(); ctx.shadowBlur = 0; 
                 ctx.fillStyle = "#FFF"; ctx.font = "12px Arial"; ctx.fillText(this.name, this.x - 20, this.y - 45);
-                ctx.fillStyle = "#C80000"; ctx.fillRect(this.x - 25, this.y - 35, 50, 5);
-                ctx.fillStyle = "#00C800"; ctx.fillRect(this.x - 25, this.y - 35, 50 * (Math.max(0, this.health) / this.stats.hp), 5);
+                ctx.fillStyle = "#C80000"; ctx.fillRect(this.x - 25, this.y - 35, 50, 5); ctx.fillStyle = "#00C800"; ctx.fillRect(this.x - 25, this.y - 35, 50 * (Math.max(0, this.health) / this.stats.hp), 5);
             }
-            
             getState() { return { active: this.active, x: this.x, y: this.y, angle: this.angle, health: this.health, swordAngle: this.swordAngle, isSwinging: this.isSwinging, isBlocking: this.isBlocking, cId: this.chassisId, wId: this.weaponId }; }
             setState(data) { 
-                this.active = data.active;
-                if (!this.active) return;
+                this.active = data.active; if (!this.active) return;
                 if (this.chassisId !== data.cId || this.weaponId !== data.wId) this.setLoadout(data.cId, data.wId);
-                this.x = data.x; this.y = data.y; this.angle = data.angle; this.health = data.health; this.swordAngle = data.swordAngle; this.isSwinging = data.isSwinging; this.isBlocking = data.isBlocking;
-                this.updatePositions();
+                this.x = data.x; this.y = data.y; this.angle = data.angle; this.health = data.health; this.swordAngle = data.swordAngle; this.isSwinging = data.isSwinging; this.isBlocking = data.isBlocking; this.updatePositions();
             }
         }
 
-        let players = [
-            new Forklift(0, "#FFD700", "Player 1"),
-            new Forklift(1, "#C83232", "Player 2"),
-            new Forklift(2, "#3264C8", "Player 3"),
-            new Forklift(3, "#32C832", "Player 4")
-        ];
+        let players = [ new Forklift(0, "#FFD700", "Player 1"), new Forklift(1, "#C83232", "Player 2"), new Forklift(2, "#3264C8", "Player 3"), new Forklift(3, "#32C832", "Player 4") ];
 
-        function resizeCanvas() {
-            const container = document.getElementById("gameContainer");
-            canvas.width = container.clientWidth - 40; canvas.height = container.clientHeight - 20; 
-        }
-        window.addEventListener("resize", resizeCanvas);
-        resizeCanvas();
+        function resizeCanvas() { const container = document.getElementById("gameContainer"); canvas.width = container.clientWidth - 40; canvas.height = container.clientHeight - 20; }
+        window.addEventListener("resize", resizeCanvas); resizeCanvas();
 
         function checkMeleeCollision(attacker, defender) {
             if (attacker.weapon.type !== 'melee') return;
             if (attacker.isSwinging && !attacker.hasHitThisSwing) {
-                const dx = attacker.swordTip.x - defender.x; const dy = attacker.swordTip.y - defender.y;
-                if (Math.sqrt(dx * dx + dy * dy) < (defender.stats.w / 2) + 15) { 
+                const startOffset = attacker.stats.w / 2; const baseX = attacker.x + Math.cos(attacker.angle) * startOffset; const baseY = attacker.y + Math.sin(attacker.angle) * startOffset;
+                const tipX = attacker.swordTip.x; const tipY = attacker.swordTip.y;
+                const defX = defender.x; const defY = defender.y; const defRadius = (defender.stats.w / 2) + 15; 
+                const lenSq = (tipX - baseX) * (tipX - baseX) + (tipY - baseY) * (tipY - baseY); let t = 0;
+                if (lenSq !== 0) { t = ((defX - baseX) * (tipX - baseX) + (defY - baseY) * (tipY - baseY)) / lenSq; t = Math.max(0, Math.min(1, t)); }
+                const closestX = baseX + t * (tipX - baseX); const closestY = baseY + t * (tipY - baseY);
+                const distance = Math.sqrt((defX - closestX)*(defX - closestX) + (defY - closestY)*(defY - closestY));
+
+                if (distance < defRadius) { 
                     attacker.hasHitThisSwing = true; 
-                    if (defender.isBlocking) {
-                        playSound('block'); 
-                        attacker.speed = 0; attacker.x -= Math.cos(attacker.angle) * 25; attacker.y -= Math.sin(attacker.angle) * 25;
-                    } else {
-                        playSound('hit'); 
-                        defender.health -= attacker.weapon.damage; 
-                        defender.speed = 0; defender.x += Math.cos(attacker.angle) * 30; defender.y += Math.sin(attacker.angle) * 30;
-                    }
+                    if (defender.isBlocking) { playSound('block'); attacker.speed = 0; attacker.x -= Math.cos(attacker.angle) * 25; attacker.y -= Math.sin(attacker.angle) * 25; } 
+                    else { playSound('hit'); defender.health -= attacker.weapon.damage; defender.speed = 0; defender.x += Math.cos(attacker.angle) * 30; defender.y += Math.sin(attacker.angle) * 30; }
                 }
             }
         }
 
         function showScreen(screenId) {
             document.querySelectorAll('.screen-overlay').forEach(s => s.style.display = 'none');
-            if(screenId) {
-                document.getElementById('inGameMenuBtn').style.display = 'none';
-                document.getElementById(screenId).style.display = 'flex';
-                gameState = "MENU";
-                if(screenId === 'hostScreen') startHostingLobby();
-            } else {
-                document.getElementById('inGameMenuBtn').style.display = 'block';
-                gameState = "PLAYING";
-                if(!audioCtx && gameSettings.sfxEnabled) audioCtx = new AudioContext();
-            }
+            if(screenId) { document.getElementById('inGameMenuBtn').style.display = 'none'; document.getElementById(screenId).style.display = 'flex'; gameState = "MENU"; if(screenId === 'hostScreen') startHostingLobby(); } 
+            else { document.getElementById('inGameMenuBtn').style.display = 'block'; gameState = "PLAYING"; if(!audioCtx && gameSettings.sfxEnabled) audioCtx = new AudioContext(); }
         }
 
         // --- MULTIPLAYER NETWORKING ---
         let peer = null, myConnection = null, clients = {}; 
-
         function startHostingLobby() {
-            gameMode = "HOST";
-            players.forEach(p => p.active = false);
-            players[0].active = true; 
-            players[0].setLoadout(document.getElementById("myChassis").value, document.getElementById("myWeapon").value);
-
-            Object.values(clients).forEach(c => { if(c.conn) c.conn.close(); });
-            clients = {};
-            for(let i=2; i<=4; i++) {
-                document.getElementById(`lobby-p${i}`).innerText = `Player ${i}: Waiting...`;
-                document.getElementById(`lobby-p${i}`).style.color = "#555";
-            }
-
+            gameMode = "HOST"; players.forEach(p => p.active = false); players[0].active = true; 
+            players[0].setLoadout(document.getElementById("p1Chassis").value, document.getElementById("p1Weapon").value); // Uses Player 1's Loadout
+            Object.values(clients).forEach(c => { if(c.conn) c.conn.close(); }); clients = {};
+            for(let i=2; i<=4; i++) { document.getElementById(`lobby-p${i}`).innerText = `Player ${i}: Waiting...`; document.getElementById(`lobby-p${i}`).style.color = "#555"; }
             if(!peer) {
-                peer = new Peer();
-                peer.on('open', id => { document.getElementById('hostIdDisplay').value = id; });
+                peer = new Peer(); peer.on('open', id => { document.getElementById('hostIdDisplay').value = id; });
                 peer.on('connection', conn => {
                     conn.on('open', () => {
-                        if (clients[conn.peer]) return;
-                        let pIdx = -1;
+                        if (clients[conn.peer]) return; let pIdx = -1;
                         for (let i = 1; i <= 3; i++) { if (!Object.values(clients).some(c => c.index === i)) { pIdx = i; break; } }
-                        if (gameState !== "MENU" || pIdx === -1) {
-                            conn.send({ type: "ERROR", msg: "Lobby Full or Match Started!" });
-                            setTimeout(() => conn.close(), 500); return;
-                        }
-                        
+                        if (gameState !== "MENU" || pIdx === -1) { conn.send({ type: "ERROR", msg: "Lobby Full or Match Started!" }); setTimeout(() => conn.close(), 500); return; }
                         clients[conn.peer] = { index: pIdx, conn: conn, inputs: { forward: 0, turn: 0, swing: false, block: false } };
-                        document.getElementById(`lobby-p${pIdx+1}`).innerText = `Player ${pIdx+1}: Connected!`;
-                        document.getElementById(`lobby-p${pIdx+1}`).style.color = players[pIdx].color;
-
-                        conn.on('data', data => {
-                            if (data.type === 'LOADOUT') { players[pIdx].setLoadout(data.cId, data.wId); players[pIdx].active = true; }
-                            if (data.type === 'INPUT') clients[conn.peer].inputs = data;
-                        });
-                        conn.on('close', () => {
-                            players[pIdx].active = false;
-                            document.getElementById(`lobby-p${pIdx+1}`).innerText = `Player ${pIdx+1}: Waiting...`;
-                            document.getElementById(`lobby-p${pIdx+1}`).style.color = "#555";
-                            delete clients[conn.peer]; 
-                        });
+                        document.getElementById(`lobby-p${pIdx+1}`).innerText = `Player ${pIdx+1}: Connected!`; document.getElementById(`lobby-p${pIdx+1}`).style.color = players[pIdx].color;
+                        conn.on('data', data => { if (data.type === 'LOADOUT') { players[pIdx].setLoadout(data.cId, data.wId); players[pIdx].active = true; } if (data.type === 'INPUT') clients[conn.peer].inputs = data; });
+                        conn.on('close', () => { players[pIdx].active = false; document.getElementById(`lobby-p${pIdx+1}`).innerText = `Player ${pIdx+1}: Waiting...`; document.getElementById(`lobby-p${pIdx+1}`).style.color = "#555"; delete clients[conn.peer]; });
                     });
                 });
             } else { document.getElementById('hostIdDisplay').value = peer.id; }
         }
-
-        function cancelHost() {
-            Object.values(clients).forEach(c => { if(c.conn) c.conn.close(); });
-            clients = {};
-            for(let i=2; i<=4; i++) {
-                document.getElementById(`lobby-p${i}`).innerText = `Player ${i}: Waiting...`;
-                document.getElementById(`lobby-p${i}`).style.color = "#555";
-            }
-            showScreen('mainMenuScreen');
-        }
-
-        function startMultiplayerHost() {
-            players.forEach(p => p.reset()); projectiles = [];
-            Object.values(clients).forEach(c => c.conn.send({ type: "START" }));
-            showScreen(null);
-        }
-
-        function rejoinLastGame() {
-            const savedHost = safeStorageGet('forkliftLastHostId');
-            if (savedHost) { document.getElementById('joinIdInput').value = savedHost; joinOnlineGame(savedHost); }
-        }
-
+        function cancelHost() { Object.values(clients).forEach(c => { if(c.conn) c.conn.close(); }); clients = {}; for(let i=2; i<=4; i++) { document.getElementById(`lobby-p${i}`).innerText = `Player ${i}: Waiting...`; document.getElementById(`lobby-p${i}`).style.color = "#555"; } showScreen('playScreen'); }
+        function startMultiplayerHost() { players.forEach(p => p.reset()); projectiles = []; Object.values(clients).forEach(c => c.conn.send({ type: "START" })); showScreen(null); }
+        function rejoinLastGame() { const savedHost = safeStorageGet('forkliftLastHostId'); if (savedHost) { document.getElementById('joinIdInput').value = savedHost; joinOnlineGame(savedHost); } }
         function joinOnlineGame(overrideId = null) {
-            const hostId = overrideId || document.getElementById('joinIdInput').value.trim();
-            if(!hostId) return;
-            
-            safeStorageSet('forkliftLastHostId', hostId);
-            document.getElementById('rejoinBtn').style.display = 'block';
-
+            const hostId = overrideId || document.getElementById('joinIdInput').value.trim(); if(!hostId) return;
+            safeStorageSet('forkliftLastHostId', hostId); document.getElementById('rejoinBtn').style.display = 'block';
             if (myConnection) { myConnection.close(); myConnection = null; }
-
             document.getElementById('joinStatus').innerText = "Connecting to Host..."; gameMode = "CLIENT";
-            
             const connectToHost = () => {
                 myConnection = peer.connect(hostId, { reliable: true });
-                myConnection.on('open', () => {
-                    document.getElementById('joinStatus').innerText = "Connected! Waiting for Host...";
-                    myConnection.send({ type: 'LOADOUT', cId: document.getElementById("myChassis").value, wId: document.getElementById("myWeapon").value });
+                myConnection.on('open', () => { 
+                    document.getElementById('joinStatus').innerText = "Connected! Waiting for Host..."; 
+                    // Send Player 1's Loadout to the host
+                    myConnection.send({ type: 'LOADOUT', cId: document.getElementById("p1Chassis").value, wId: document.getElementById("p1Weapon").value }); 
                 });
-
-                myConnection.on('data', data => {
-                    if (data.type === "START") { projectiles = []; showScreen(null); }
-                    else if (data.type === "STATE") applyNetworkState(data.state, data.projs);
-                    else if (data.type === "ERROR") document.getElementById('joinStatus').innerText = data.msg;
-                });
-
-                myConnection.on('close', () => {
-                    document.getElementById('joinStatus').innerText = "Host closed the connection.";
-                    if (gameState === "PLAYING") {
-                        gameState = "GAMEOVER";
-                        document.getElementById("winnerText").innerText = "Host Disconnected!";
-                        document.getElementById("winnerText").style.color = "#C83232";
-                        document.getElementById("gameOverScreen").style.display = "flex";
-                        document.getElementById("inGameMenuBtn").style.display = "none";
-                    }
-                });
+                myConnection.on('data', data => { if (data.type === "START") { projectiles = []; showScreen(null); } else if (data.type === "STATE") applyNetworkState(data.state, data.projs); else if (data.type === "ERROR") document.getElementById('joinStatus').innerText = data.msg; });
+                myConnection.on('close', () => { document.getElementById('joinStatus').innerText = "Host closed the connection."; if (gameState === "PLAYING") { gameState = "GAMEOVER"; document.getElementById("winnerText").innerText = "Host Disconnected!"; document.getElementById("winnerText").style.color = "#C83232"; document.getElementById("gameOverScreen").style.display = "flex"; document.getElementById("inGameMenuBtn").style.display = "none"; } });
             };
-
-            if(!peer) {
-                peer = new Peer();
-                peer.on('open', connectToHost);
-                peer.on('error', err => { document.getElementById('joinStatus').innerText = "Network Error: " + err.type; });
-            } else { connectToHost(); }
+            if(!peer) { peer = new Peer(); peer.on('open', connectToHost); peer.on('error', err => { document.getElementById('joinStatus').innerText = "Network Error: " + err.type; }); } else { connectToHost(); }
         }
 
         function startOfflineGame() {
             gameMode = document.getElementById('offlineModeSelect').value;
             players.forEach(p => p.active = false); projectiles = [];
             players[0].active = true; players[1].active = true;
-            players[0].setLoadout(document.getElementById("myChassis").value, document.getElementById("myWeapon").value);
-            players[1].setLoadout("standard", "standard"); 
+            
+            // Assign loadouts to both players from the Garage selects
+            players[0].setLoadout(document.getElementById("p1Chassis").value, document.getElementById("p1Weapon").value);
+            players[1].setLoadout(document.getElementById("p2Chassis").value, document.getElementById("p2Weapon").value); 
+            
             players.forEach(p => p.reset());
             showScreen(null);
         }
@@ -658,16 +532,8 @@
 
         function applyNetworkState(stateArray, projsArray) {
             let activeCount = 0; let lastAlive = null;
-            for(let i=0; i<4; i++) {
-                players[i].setState(stateArray[i]);
-                if(players[i].active && players[i].health > 0) { activeCount++; lastAlive = players[i]; }
-            }
-            
-            // Rebuild dummy projectiles from host data for rendering
-            if (projsArray) {
-                projectiles = projsArray.map(p => new Projectile(p.x, p.y, 0, 0, 0, -1, p.color));
-            }
-
+            for(let i=0; i<4; i++) { players[i].setState(stateArray[i]); if(players[i].active && players[i].health > 0) { activeCount++; lastAlive = players[i]; } }
+            if (projsArray) { projectiles = projsArray.map(p => new Projectile(p.x, p.y, 0, 0, 0, -1, p.color)); }
             if (activeCount <= 1 && lastAlive) endGame(lastAlive.name, lastAlive.color);
         }
 
@@ -675,7 +541,7 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             if (gameState === "PLAYING") {
-                if (gameMode === "LOCAL" || gameMode === "AI" || gameMode === "HOST") {
+                if (gameMode === "LOCAL" || gameMode.startsWith("AI") || gameMode === "HOST") {
                     
                     let p1Fwd = (keys[keyBinds.p1.up] ? 1 : 0) - (keys[keyBinds.p1.down] ? 1 : 0);
                     let p1Trn = (keys[keyBinds.p1.right] ? 1 : 0) - (keys[keyBinds.p1.left] ? 1 : 0);
@@ -690,7 +556,8 @@
                         if (keys[keyBinds.p2.swing]) players[1].swing();
                         if (keys[keyBinds.p2.block]) players[1].block();
                     } 
-                    else if (gameMode === "AI") {
+                    
+                    else if (gameMode.startsWith("AI")) {
                         let ai = players[1]; let target = players[0];
                         let dx = target.x - ai.x; let dy = target.y - ai.y;
                         let distance = Math.sqrt(dx * dx + dy * dy);
@@ -701,15 +568,43 @@
                         
                         let p2Trn = 0; let p2Fwd = 0;
                         if (diff > 0.1) p2Trn = 1; else if (diff < -0.1) p2Trn = -1;
-                        const optimalDist = ai.weapon.length + (target.stats.w / 2) + 20;
-                        if (distance > optimalDist + 20) p2Fwd = 0.85; else if (distance < optimalDist - 15) p2Fwd = -0.6; 
                         
-                        if (distance < optimalDist + 30 && Math.abs(diff) < 0.5) ai.swing();
-                        if (target.isSwinging && distance < target.weapon.length + 50 && ai.blockCooldown === 0) {
-                            if (Math.random() < 0.15) ai.block();
+                        let diffLevel = gameMode === "AI_EASY" ? 1 : (gameMode === "AI_MED" ? 2 : 3);
+                        const optimalDist = ai.weapon.length + (target.stats.w / 2) + (diffLevel === 1 ? -10 : 20);
+                        
+                        ai.aiTimer++;
+
+                        if (ai.blockCooldown > 0 && diffLevel > 1) { 
+                            p2Fwd = -1; 
+                        } else if (distance > optimalDist + 20) {
+                            p2Fwd = (diffLevel === 1 ? 0.5 : 0.85); 
+                        } else if (distance < optimalDist - 15) {
+                            p2Fwd = (diffLevel === 1 ? -0.3 : -0.8); 
+                        } else if (diffLevel > 1 && Math.random() < 0.02) {
+                            p2Fwd = (Math.random() > 0.5 ? 0.5 : -0.5); 
                         }
+                        
+                        if (distance < optimalDist + 30 && Math.abs(diff) < 0.5) {
+                            if (ai.aiTimer % (60 / diffLevel) === 0 && Math.random() < (0.3 * diffLevel)) {
+                                ai.swing();
+                            }
+                        }
+
+                        if (target.isSwinging && target.swordAngle > 0 && target.swordAngle < 0.5 && ai.blockCooldown === 0) {
+                            if (!ai.hasRolledParry) {
+                                ai.hasRolledParry = true; 
+                                let parryChance = diffLevel === 1 ? 0.05 : (diffLevel === 2 ? 0.40 : 0.85);
+                                if (distance < target.weapon.length + 60 && Math.random() < parryChance) {
+                                    ai.block(); 
+                                }
+                            }
+                        } else if (!target.isSwinging) {
+                            ai.hasRolledParry = false;
+                        }
+
                         ai.move(p2Fwd, p2Trn);
                     }
+                    
                     else if (gameMode === "HOST") {
                         Object.values(clients).forEach(c => {
                             let p = players[c.index];
@@ -723,7 +618,6 @@
                     
                     players.forEach(p => { if(p.active) p.updateAbilities(); });
 
-                    // Physics Updates
                     projectiles.forEach(proj => {
                         proj.update();
                         players.forEach(p => {
