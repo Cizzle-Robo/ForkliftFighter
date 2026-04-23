@@ -62,14 +62,21 @@
                 <button class="menu-btn" style="width: 250px; font-size: 24px;" onclick="showScreen('settingsScreen')">Settings</button>
                 <button class="menu-btn" style="width: 250px; font-size: 18px; background: #333; margin-top: 10px;" onclick="showScreen('patchNotesScreen')">Patch Notes</button>
             </div>
-            <div class="version-text">v1.0.2</div>
+            <div class="version-text">v1.0.3</div>
         </div>
 
         <div id="patchNotesScreen" class="screen-overlay">
             <h2 class="screen-title">Update History</h2>
             <div class="menu-box" style="width: 80%; max-width: 700px; text-align: left; overflow-y: auto; max-height: 60vh; background: rgba(0,0,0,0.5); padding-right: 20px;">
                 
-                <h3 style="color: #FFD700; border-bottom: 1px solid #444; padding-bottom: 5px; margin-top: 0;">v1.0.2 - The Network Optimization Patch</h3>
+                <h3 style="color: #FFD700; border-bottom: 1px solid #444; padding-bottom: 5px; margin-top: 0;">v1.0.3 - The Durability Patch</h3>
+                <ul style="color: #CCC; line-height: 1.6;">
+                    <li><strong>Balance:</strong> Increased the base HP of all Chassis types by roughly 50% to lengthen engagements.</li>
+                    <li><strong>Balance:</strong> Slightly reduced the damage of all melee weapons to prevent instant deletions.</li>
+                    <li><strong>Combat Fix:</strong> Fixed a massive bug where the Greatsword's Whirlwind ability bypassed swing limits, hitting targets every single frame and causing instant death.</li>
+                </ul>
+
+                <h3 style="color: #FFD700; border-bottom: 1px solid #444; padding-bottom: 5px; margin-top: 30px;">v1.0.2 - The Network Optimization Patch</h3>
                 <ul style="color: #CCC; line-height: 1.6;">
                     <li><strong>Netcode:</strong> Improved packet routing for peer-to-peer multiplayer, reducing latency during heavy combat.</li>
                     <li><strong>Balancing:</strong> Speedster chassis max speed slightly reduced to prevent clipping through the warehouse walls.</li>
@@ -360,20 +367,20 @@
 
         // --- GAME DATABASES ---
         const CHASSIS_DB = {
-            standard:  { w: 40, h: 30, maxSpeed: 6.0, acc: 0.30, turn: 0.07, hp: 100 },
-            bulldozer: { w: 50, h: 40, maxSpeed: 3.5, acc: 0.15, turn: 0.04, hp: 150 },
-            speedster: { w: 32, h: 22, maxSpeed: 8.5, acc: 0.50, turn: 0.10, hp: 60  },
-            tank:      { w: 60, h: 45, maxSpeed: 2.5, acc: 0.10, turn: 0.03, hp: 200 },
-            drifter:   { w: 35, h: 25, maxSpeed: 7.0, acc: 0.20, turn: 0.15, hp: 80  },
+            standard:  { w: 40, h: 30, maxSpeed: 6.0, acc: 0.30, turn: 0.07, hp: 150 }, // HP up from 100
+            bulldozer: { w: 50, h: 40, maxSpeed: 3.5, acc: 0.15, turn: 0.04, hp: 200 }, // HP up from 150
+            speedster: { w: 32, h: 22, maxSpeed: 8.5, acc: 0.50, turn: 0.10, hp: 100 }, // HP up from 60
+            tank:      { w: 60, h: 45, maxSpeed: 2.5, acc: 0.10, turn: 0.03, hp: 300 }, // HP up from 200
+            drifter:   { w: 35, h: 25, maxSpeed: 7.0, acc: 0.20, turn: 0.15, hp: 120 }, // HP up from 80
             admin:     { w: 40, h: 30, maxSpeed: 15.0, acc: 1.50, turn: 0.20, hp: 5000 }
         };
         const WEAPON_DB = {
-            standard:   { type: 'melee', length: 70,  swingSpeed: 0.25, retractSpeed: 0.10, damage: 20, spCooldown: 600 }, // Overdrive (10s cd)
-            greatsword: { type: 'melee', length: 100, swingSpeed: 0.12, retractSpeed: 0.04, damage: 40, spCooldown: 480 }, // Whirlwind (8s cd)
-            rapier:     { type: 'melee', length: 45,  swingSpeed: 0.50, retractSpeed: 0.25, damage: 10, spCooldown: 300 }, // Lunge (5s cd)
-            lance:      { type: 'melee', length: 140, swingSpeed: 0.08, retractSpeed: 0.05, damage: 30, spCooldown: 720 }, // Juggernaut (12s cd)
-            dagger:     { type: 'melee', length: 25,  swingSpeed: 0.80, retractSpeed: 0.40, damage: 15, spCooldown: 600 }, // Cloak (10s cd)
-            admin:      { type: 'ranged', length: 30,  fireRate: 8, projSpeed: 25, damage: 9999, spCooldown: 120 }          // Scatter (2s cd)
+            standard:   { type: 'melee', length: 70,  swingSpeed: 0.25, retractSpeed: 0.10, damage: 15, spCooldown: 600 }, // Dmg 20 -> 15
+            greatsword: { type: 'melee', length: 100, swingSpeed: 0.12, retractSpeed: 0.04, damage: 30, spCooldown: 480 }, // Dmg 40 -> 30
+            rapier:     { type: 'melee', length: 45,  swingSpeed: 0.50, retractSpeed: 0.25, damage: 8,  spCooldown: 300 }, // Dmg 10 -> 8
+            lance:      { type: 'melee', length: 140, swingSpeed: 0.08, retractSpeed: 0.05, damage: 25, spCooldown: 720 }, // Dmg 30 -> 25
+            dagger:     { type: 'melee', length: 25,  swingSpeed: 0.80, retractSpeed: 0.40, damage: 10, spCooldown: 600 }, // Dmg 15 -> 10
+            admin:      { type: 'ranged', length: 30,  fireRate: 8, projSpeed: 25, damage: 9999, spCooldown: 120 }          
         };
 
         // --- PROJECTILES & FORKLIFT CLASSES ---
@@ -570,8 +577,8 @@
             // Treat normal swings OR an active Rapier Lunge as an attack
             let isLunging = attacker.weaponId === 'rapier' && attacker.specialActiveTimer > 0;
             
-            // Allow greatsword whirlwind to hit multiple times over the spin, but not instantly kill.
-            if ((attacker.isSwinging || isLunging) && (!attacker.hasHitThisSwing || attacker.weaponId === 'greatsword')) {
+            // FIXED: Removed the bypass that allowed the Greatsword to hit every frame
+            if ((attacker.isSwinging || isLunging) && !attacker.hasHitThisSwing) {
                 const startOffset = attacker.stats.w / 2; const baseX = attacker.x + Math.cos(attacker.angle) * startOffset; const baseY = attacker.y + Math.sin(attacker.angle) * startOffset;
                 const tipX = attacker.swordTip.x; const tipY = attacker.swordTip.y;
                 const defX = defender.x; const defY = defender.y; const defRadius = (defender.stats.w / 2) + 15; 
@@ -581,7 +588,7 @@
                 const distance = Math.sqrt((defX - closestX)*(defX - closestX) + (defY - closestY)*(defY - closestY));
 
                 if (distance < defRadius) { 
-                    attacker.hasHitThisSwing = true; 
+                    attacker.hasHitThisSwing = true; // This securely locks the damage out until the next swing
                     if (defender.isBlocking) { 
                         playSound('block'); attacker.speed = 0; 
                         if (!attacker.isJuggernaut) { attacker.x -= Math.cos(attacker.angle) * 25; attacker.y -= Math.sin(attacker.angle) * 25; }
