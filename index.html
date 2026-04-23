@@ -27,6 +27,8 @@
         #inGameMenuBtn:hover { background: #FF0000; color: #FFF; border-color: #FFF; }
 
         .menu-box { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px; border: 1px solid #555; margin: 10px; display: flex; flex-direction: column; gap: 15px; align-items: center; width: 350px; }
+        .menu-box.clickable { cursor: pointer; transition: transform 0.2s, background 0.2s; }
+        .menu-box.clickable:hover { transform: scale(1.05); background: rgba(255,255,255,0.1); }
         .menu-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }
         
         select, input[type="text"], input[type="range"] { background: #333; color: #fff; border: 1px solid #777; padding: 10px; border-radius: 4px; font-size: 16px; width: 100%; box-sizing: border-box; cursor: pointer; outline: none; text-align: center;}
@@ -42,6 +44,10 @@
         .keybind-btn.listening { background: #C83232; animation: pulse 1s infinite; }
         
         .version-text { position: absolute; bottom: 20px; right: 30px; color: #777; font-family: monospace; font-size: 16px; }
+        
+        /* New Credits Button Styles */
+        .credits-btn { position: absolute; bottom: 20px; left: 30px; background: #333; color: #AAA; border: 1px solid #555; padding: 5px 10px; font-size: 12px; cursor: pointer; border-radius: 4px; font-family: monospace; transition: all 0.2s; }
+        .credits-btn:hover { background: #FFD700; color: #000; border-color: #FFF; }
 
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
     </style>
@@ -62,71 +68,98 @@
                 <button class="menu-btn" style="width: 250px; font-size: 24px;" onclick="showScreen('settingsScreen')">Settings</button>
                 <button class="menu-btn" style="width: 250px; font-size: 18px; background: #333; margin-top: 10px;" onclick="showScreen('patchNotesScreen')">Patch Notes</button>
             </div>
-            <div class="version-text">v1.1.0</div>
+            <button class="credits-btn" onclick="showScreen('creditsScreen')">Credits</button>
+            <div class="version-text">v1.1.2</div>
+        </div>
+
+        <div id="creditsScreen" class="screen-overlay">
+            <h2 class="screen-title">Credits</h2>
+            <div class="menu-box" style="width: 80%; max-width: 600px; text-align: center; border-color: #00FFFF;">
+                <p style="color: #FFF; font-size: 22px; line-height: 1.6;">
+                    Game coded and developed and design by <strong>Google Gemini</strong>
+                    <br><br><span style="color: #FFD700; font-size: 18px;">and</span><br><br>
+                    Game thought of by <strong>Cizzle_Robo</strong>
+                </p>
+            </div>
+            <button class="menu-btn back-btn" onclick="showScreen('mainMenuScreen')">Back to Menu</button>
         </div>
 
         <div id="patchNotesScreen" class="screen-overlay">
             <h2 class="screen-title">Update History</h2>
             <div class="menu-box" style="width: 80%; max-width: 700px; text-align: left; overflow-y: auto; max-height: 60vh; background: rgba(0,0,0,0.5); padding-right: 20px;">
-                
-                <h3 style="color: #FFD700; border-bottom: 1px solid #444; padding-bottom: 5px; margin-top: 0;">v1.1.0 - The Arena Update</h3>
+                <h3 style="color: #00FFFF; border-bottom: 1px solid #444; padding-bottom: 5px; margin-top: 0;">v1.1.2 - Menu Fixes & Credits</h3>
                 <ul style="color: #CCC; line-height: 1.6;">
-                    <li><strong>New Feature (Maps):</strong> Added dynamic map generation! Choose between Open Floor, Pillar Maze, and The Vault.</li>
-                    <li><strong>New Feature (Modes):</strong> Added Team Deathmatch (2v2). Friendly fire is disabled, and teams are assigned visually by color.</li>
-                    <li><strong>Physics:</strong> Added circle-collision logic for concrete pillars. Weapons, projectiles, and forklifts now bounce off obstacles!</li>
+                    <li><strong>Bug Fix:</strong> Fixed an issue where the Play Menu instantly closed itself when opened.</li>
+                    <li><strong>New Feature:</strong> Added a Credits page in the Main Menu!</li>
                 </ul>
 
-                <h3 style="color: #00FFFF; border-bottom: 1px solid #444; padding-bottom: 5px; margin-top: 30px;">v1.0.3 - The Durability Patch</h3>
+                <h3 style="color: #FFD700; border-bottom: 1px solid #444; padding-bottom: 5px; margin-top: 30px;">v1.1.1 - UI Overhaul</h3>
                 <ul style="color: #CCC; line-height: 1.6;">
-                    <li><strong>Balance:</strong> Increased the base HP of all Chassis types by roughly 50%.</li>
-                    <li><strong>Balance:</strong> Slightly reduced the damage of all melee weapons.</li>
-                    <li><strong>Combat Fix:</strong> Fixed a massive bug where the Greatsword's Whirlwind hit targets every frame instantly.</li>
+                    <li><strong>UI Flow:</strong> Redesigned the Play Menu to cleanly separate Local and Online configurations.</li>
+                    <li><strong>Host Control:</strong> Hosts now select the Map and Game Mode directly from the hosting lobby screen.</li>
                 </ul>
             </div>
             <button class="menu-btn back-btn" onclick="showScreen('mainMenuScreen')">Back to Menu</button>
         </div>
 
         <div id="playScreen" class="screen-overlay">
-            <h2 class="screen-title">Select Mode</h2>
-            
-            <div style="display: flex; gap: 20px; margin-bottom: 20px; justify-content: center; width: 100%;">
-                <div class="menu-box" style="width: 250px; margin: 0;">
-                    <label style="color:#FFF;">Game Rules:</label>
-                    <select id="rulesSelect">
-                        <option value="FFA">Free-For-All (Deathmatch)</option>
-                        <option value="TDM">Team Deathmatch (2v2)</option>
-                    </select>
+            <h2 class="screen-title" id="playScreenTitle">Select Connection</h2>
+
+            <div id="pathSelection" class="flex-container">
+                <div class="menu-box clickable" style="border-color: #FFD700;" onclick="setPlayPath('offline')">
+                    <h3 style="color: #FFD700; margin: 0; font-size: 28px;">Offline / Local</h3>
+                    <p style="color: #CCC; margin: 5px 0;">Play against AI or share the keyboard.</p>
                 </div>
-                <div class="menu-box" style="width: 250px; margin: 0;">
-                    <label style="color:#FFF;">Arena Map:</label>
-                    <select id="mapSelect">
-                        <option value="open">Open Floor</option>
-                        <option value="pillars">Pillar Maze</option>
-                        <option value="center">The Vault</option>
-                    </select>
+                <div class="menu-box clickable" style="border-color: #00FFFF;" onclick="setPlayPath('online')">
+                    <h3 style="color: #00FFFF; margin: 0; font-size: 28px;">Online Multiplayer</h3>
+                    <p style="color: #CCC; margin: 5px 0;">Host or join a match over the internet.</p>
                 </div>
             </div>
 
-            <div class="menu-row">
-                <div class="menu-box">
-                    <h3 style="color: #FFD700; margin: 0;">Offline Play</h3>
-                    <select id="offlineModeSelect">
-                        <option value="LOCAL">Opponent: Player 2 (Local)</option>
-                        <option value="AI_EASY">Opponent: AI (Trainee)</option>
-                        <option value="AI_MED">Opponent: AI (Journeyman)</option>
-                        <option value="AI_HARD">Opponent: AI (OSHA Boss)</option>
-                    </select>
-                    <button class="menu-btn" style="width: 100%;" onclick="startOfflineGame()">Start Match</button>
+            <div id="offlineOptions" style="display: none; flex-direction: column; align-items: center; width: 100%;">
+                <div style="display: flex; gap: 20px; margin-bottom: 20px; justify-content: center; flex-wrap: wrap; width: 100%;">
+                    <div class="menu-box" style="width: 250px; margin: 0;">
+                        <label style="color:#FFF;">Game Rules:</label>
+                        <select id="rulesSelectOffline">
+                            <option value="FFA">Free-For-All (Deathmatch)</option>
+                            <option value="TDM">Team Deathmatch (2v2)</option>
+                        </select>
+                    </div>
+                    <div class="menu-box" style="width: 250px; margin: 0;">
+                        <label style="color:#FFF;">Arena Map:</label>
+                        <select id="mapSelectOffline">
+                            <option value="open">Open Floor</option>
+                            <option value="pillars">Pillar Maze</option>
+                            <option value="center">The Vault</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="menu-box">
-                    <h3 style="color: #00FFFF; margin: 0;">Online Multiplayer (Up to 4)</h3>
-                    <div style="display: flex; gap: 10px; width: 100%;">
-                        <button class="menu-btn" style="flex: 1; padding: 12px 10px;" onclick="showScreen('hostScreen')">Host Game</button>
-                        <button class="menu-btn" style="flex: 1; padding: 12px 10px;" onclick="showScreen('joinScreen')">Join Game</button>
+                <div class="menu-box" style="width: 300px; border-color: #FFD700;">
+                    <label style="color:#FFF;">Opponent:</label>
+                    <select id="offlineModeSelect">
+                        <option value="LOCAL">Player 2 (Local)</option>
+                        <option value="AI_EASY">AI (Trainee)</option>
+                        <option value="AI_MED">AI (Journeyman)</option>
+                        <option value="AI_HARD">AI (OSHA Boss)</option>
+                    </select>
+                    <button class="menu-btn" style="width: 100%; margin-top: 10px; background: #00C800;" onclick="startOfflineGame()">Start Match</button>
+                </div>
+            </div>
+
+            <div id="onlineOptions" style="display: none; flex-direction: column; align-items: center; width: 100%;">
+                <div class="flex-container">
+                    <div class="menu-box clickable" style="border-color: #3264C8;" onclick="showScreen('hostScreen')">
+                        <h3 style="color: #3264C8; margin: 0; font-size: 24px;">Host Game</h3>
+                        <p style="color: #CCC; margin: 5px 0;">Create a room code and set the rules.</p>
+                    </div>
+                    <div class="menu-box clickable" style="border-color: #C83232;" onclick="showScreen('joinScreen')">
+                        <h3 style="color: #C83232; margin: 0; font-size: 24px;">Join Game</h3>
+                        <p style="color: #CCC; margin: 5px 0;">Enter a friend's room code to play.</p>
                     </div>
                 </div>
             </div>
-            <button class="menu-btn back-btn" onclick="showScreen('mainMenuScreen')">Back to Menu</button>
+
+            <button id="playBackBtn" class="menu-btn back-btn" onclick="resetPlayScreen()">Back to Menu</button>
         </div>
 
         <div id="settingsScreen" class="screen-overlay">
@@ -220,10 +253,29 @@
 
         <div id="hostScreen" class="screen-overlay">
             <h1>Hosting Game</h1>
-            <div class="menu-box" style="width: 400px;">
-                <p>Send this ID to your friends (Max 4 Players):</p>
+            <div class="menu-box" style="width: 450px;">
+                <p style="margin: 0;">Send this ID to your friends (Max 4 Players):</p>
                 <input type="text" id="hostIdDisplay" readonly value="Generating ID...">
-                <div style="text-align: left; width: 100%; margin-top: 15px; background: #222; padding: 10px; border-radius: 5px;">
+                
+                <div style="display: flex; gap: 10px; width: 100%; margin-top: 10px;">
+                    <div style="flex: 1;">
+                        <label style="color:#FFF; font-size: 14px;">Game Rules:</label>
+                        <select id="rulesSelectOnline" style="padding: 8px; font-size: 14px;">
+                            <option value="FFA">Free-For-All</option>
+                            <option value="TDM">Team Deathmatch</option>
+                        </select>
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="color:#FFF; font-size: 14px;">Arena Map:</label>
+                        <select id="mapSelectOnline" style="padding: 8px; font-size: 14px;">
+                            <option value="open">Open Floor</option>
+                            <option value="pillars">Pillar Maze</option>
+                            <option value="center">The Vault</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="text-align: left; width: 100%; margin-top: 15px; background: #222; padding: 10px; border-radius: 5px; box-sizing: border-box;">
                     <h4 style="margin: 0 0 10px 0; color: #AAA;">Lobby:</h4>
                     <p id="lobby-p1" style="margin: 5px 0; color: #FFD700;">Player 1: Host (You)</p>
                     <p id="lobby-p2" style="margin: 5px 0; color: #555;">Player 2: Waiting...</p>
@@ -244,7 +296,7 @@
                 <button id="rejoinBtn" class="menu-btn" style="width: 100%; margin-top: 10px; background: #3264C8; display: none;" onclick="rejoinLastGame()">Rejoin Last Host</button>
                 <p id="joinStatus" style="color: #FFD700; margin: 0;"></p>
             </div>
-            <button class="menu-btn back-btn" onclick="showScreen('playScreen')">Cancel</button>
+            <button class="menu-btn back-btn" onclick="showScreen('playScreen'); setPlayPath('online');">Cancel</button>
         </div>
 
         <div id="gameOverScreen" class="screen-overlay">
@@ -270,7 +322,6 @@
         let activePillars = [];
 
         // --- MAP DEFINITIONS ---
-        // Coordinates are relative percentages (0.0 to 1.0) so they scale with window size
         const MAP_DB = {
             open: [],
             pillars: [
@@ -617,7 +668,7 @@
                 const startOffset = attacker.stats.w / 2; const baseX = attacker.x + Math.cos(attacker.angle) * startOffset; const baseY = attacker.y + Math.sin(attacker.angle) * startOffset;
                 const tipX = attacker.swordTip.x; const tipY = attacker.swordTip.y;
                 
-                // Weapon to Pillar Collision - bounces weapon off walls
+                // Weapon to Pillar Collision
                 for(let p of activePillars) {
                     const lSq = (tipX - baseX)*(tipX - baseX) + (tipY - baseY)*(tipY - baseY); let pt = 0;
                     if (lSq !== 0) { pt = ((p.x - baseX)*(tipX - baseX) + (p.y - baseY)*(tipY - baseY)) / lSq; pt = Math.max(0, Math.min(1, pt)); }
@@ -645,10 +696,51 @@
             }
         }
 
+        // --- NEW PLAY MENU LOGIC ---
+        function setPlayPath(path) {
+            document.getElementById('pathSelection').style.display = 'none';
+            document.getElementById('playBackBtn').onclick = resetPlayScreen;
+            document.getElementById('playBackBtn').innerText = 'Back';
+
+            if (path === 'offline') {
+                document.getElementById('playScreenTitle').innerText = 'Offline Setup';
+                document.getElementById('offlineOptions').style.display = 'flex';
+                document.getElementById('onlineOptions').style.display = 'none';
+            } else if (path === 'online') {
+                document.getElementById('playScreenTitle').innerText = 'Online Multiplayer';
+                document.getElementById('offlineOptions').style.display = 'none';
+                document.getElementById('onlineOptions').style.display = 'flex';
+            }
+        }
+
+        function resetPlayScreen() {
+            // Show the path selection choices
+            document.getElementById('pathSelection').style.display = 'flex';
+            
+            // Hide the sub-menus
+            document.getElementById('offlineOptions').style.display = 'none';
+            document.getElementById('onlineOptions').style.display = 'none';
+            
+            // Reset the titles and Back button
+            document.getElementById('playScreenTitle').innerText = 'Select Connection';
+            document.getElementById('playBackBtn').onclick = () => showScreen('mainMenuScreen');
+            document.getElementById('playBackBtn').innerText = 'Back to Menu';
+        }
+
         function showScreen(screenId) {
             document.querySelectorAll('.screen-overlay').forEach(s => s.style.display = 'none');
-            if(screenId) { document.getElementById('inGameMenuBtn').style.display = 'none'; document.getElementById(screenId).style.display = 'flex'; gameState = "MENU"; if(screenId === 'hostScreen') startHostingLobby(); } 
-            else { document.getElementById('inGameMenuBtn').style.display = 'block'; gameState = "PLAYING"; if(!audioCtx && gameSettings.sfxEnabled) audioCtx = new AudioContext(); }
+            if(screenId) { 
+                document.getElementById('inGameMenuBtn').style.display = 'none'; 
+                document.getElementById(screenId).style.display = 'flex'; 
+                gameState = "MENU"; 
+                if(screenId === 'playScreen') resetPlayScreen();
+                if(screenId === 'hostScreen') startHostingLobby(); 
+            } 
+            else { 
+                document.getElementById('inGameMenuBtn').style.display = 'block'; 
+                gameState = "PLAYING"; 
+                if(!audioCtx && gameSettings.sfxEnabled) audioCtx = new AudioContext(); 
+            }
         }
 
         // --- MULTIPLAYER NETWORKING ---
@@ -673,11 +765,11 @@
                 });
             } else { document.getElementById('hostIdDisplay').value = peer.id; }
         }
-        function cancelHost() { Object.values(clients).forEach(c => { if(c.conn) c.conn.close(); }); clients = {}; for(let i=2; i<=4; i++) { document.getElementById(`lobby-p${i}`).innerText = `Player ${i}: Waiting...`; document.getElementById(`lobby-p${i}`).style.color = "#555"; } showScreen('playScreen'); }
+        function cancelHost() { Object.values(clients).forEach(c => { if(c.conn) c.conn.close(); }); clients = {}; for(let i=2; i<=4; i++) { document.getElementById(`lobby-p${i}`).innerText = `Player ${i}: Waiting...`; document.getElementById(`lobby-p${i}`).style.color = "#555"; } showScreen('playScreen'); setPlayPath('online'); }
         
         function startMultiplayerHost() { 
-            currentRules = document.getElementById('rulesSelect').value;
-            currentMapId = document.getElementById('mapSelect').value;
+            currentRules = document.getElementById('rulesSelectOnline').value;
+            currentMapId = document.getElementById('mapSelectOnline').value;
             assignTeamsAndColors(); buildMap();
             players.forEach(p => p.reset()); projectiles = []; 
             Object.values(clients).forEach(c => c.conn.send({ type: "START", rules: currentRules, mapId: currentMapId })); 
@@ -711,8 +803,8 @@
 
         function startOfflineGame() {
             gameMode = document.getElementById('offlineModeSelect').value;
-            currentRules = document.getElementById('rulesSelect').value;
-            currentMapId = document.getElementById('mapSelect').value;
+            currentRules = document.getElementById('rulesSelectOffline').value;
+            currentMapId = document.getElementById('mapSelectOffline').value;
             
             players.forEach(p => p.active = false); projectiles = [];
             players[0].active = true; players[1].active = true;
