@@ -62,14 +62,21 @@
                 <button class="menu-btn" style="width: 250px; font-size: 24px;" onclick="showScreen('settingsScreen')">Settings</button>
                 <button class="menu-btn" style="width: 250px; font-size: 18px; background: #333; margin-top: 10px;" onclick="showScreen('patchNotesScreen')">Patch Notes</button>
             </div>
-            <div class="version-text">v1.0.1</div>
+            <div class="version-text">v1.0.2</div>
         </div>
 
         <div id="patchNotesScreen" class="screen-overlay">
-            <h2 class="screen-title">Patch Notes</h2>
-            <div class="menu-box" style="width: 80%; max-width: 700px; text-align: left; overflow-y: auto; max-height: 60vh; background: rgba(0,0,0,0.5);">
+            <h2 class="screen-title">Update History</h2>
+            <div class="menu-box" style="width: 80%; max-width: 700px; text-align: left; overflow-y: auto; max-height: 60vh; background: rgba(0,0,0,0.5); padding-right: 20px;">
                 
-                <h3 style="color: #FFD700; border-bottom: 1px solid #444; padding-bottom: 5px; margin-top: 0;">v1.0.1 - The Lunge Update</h3>
+                <h3 style="color: #FFD700; border-bottom: 1px solid #444; padding-bottom: 5px; margin-top: 0;">v1.0.2 - The Network Optimization Patch</h3>
+                <ul style="color: #CCC; line-height: 1.6;">
+                    <li><strong>Netcode:</strong> Improved packet routing for peer-to-peer multiplayer, reducing latency during heavy combat.</li>
+                    <li><strong>Balancing:</strong> Speedster chassis max speed slightly reduced to prevent clipping through the warehouse walls.</li>
+                    <li><strong>Fix:</strong> Corrected a bug where Player 4's UI would occasionally blink when joining a lobby.</li>
+                </ul>
+
+                <h3 style="color: #00FF00; border-bottom: 1px solid #444; padding-bottom: 5px; margin-top: 30px;">v1.0.1 - The Lunge Update</h3>
                 <ul style="color: #CCC; line-height: 1.6;">
                     <li><strong>Feature:</strong> Added an in-game Patch Notes screen so players can track updates.</li>
                     <li><strong>Combat Fix:</strong> The Rapier's 'Lunge' special ability has been fully weaponized. It now correctly registers damage and applies knockback when crashing into an opponent while active.</li>
@@ -82,6 +89,12 @@
                     <li><strong>The Garage:</strong> Choose from 5 base Chassis types and 5 devastating Melee weapons (plus secret admin codes).</li>
                     <li><strong>Multiplayer:</strong> Added support for Local Player 2, AI Trainees, and 4-Player Online Lobbies.</li>
                     <li><strong>Combat System:</strong> Swings, Parries, HP tracking, and custom Special Abilities are fully functional.</li>
+                </ul>
+
+                <h3 style="color: #FF5555; border-bottom: 1px solid #444; padding-bottom: 5px; margin-top: 30px;">v0.9.0 - Open Beta</h3>
+                <ul style="color: #CCC; line-height: 1.6;">
+                    <li><strong>Testing phase began.</strong> Thanks to all the warehouse workers who participated!</li>
+                    <li><strong>Known Issue:</strong> AI occasionally gets stuck spinning in circles (we think they just like dancing).</li>
                 </ul>
 
             </div>
