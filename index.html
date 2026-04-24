@@ -68,28 +68,24 @@
             
             <div class="bottom-right-container">
                 <button class="small-menu-btn" onclick="showScreen('creditsScreen')">Credits</button>
-                <button class="small-menu-btn" style="color: #FFD700; border-color: #FFD700;" onclick="showScreen('patchNotesScreen')">v1.3.1</button>
+                <button class="small-menu-btn" style="color: #FFD700; border-color: #FFD700;" onclick="showScreen('patchNotesScreen')">v1.3.4</button>
             </div>
         </div>
 
         <div id="patchNotesScreen" class="screen-overlay">
             <h2 class="screen-title">Patch Notes</h2>
             <div class="menu-box" style="width: 80%; max-width: 600px; text-align: left; max-height: 60vh; overflow-y: auto; display: block;">
-                <h3 style="color: #FFD700; margin-top: 0;">v1.3.1 (Current) - Balance Pass</h3>
+                <h3 style="color: #FFD700; margin-top: 0;">v1.3.4 (Current) - Armory Update</h3>
                 <ul style="color: #CCC; line-height: 1.6; padding-left: 20px; margin-bottom: 0;">
-                    <li><strong>Balance Update:</strong> Heavy weapons deal more damage. Tick damage increased for Chainsaw and Blowtorch.</li>
-                    <li><strong>Cooldowns:</strong> Reduced cooldowns across the board (Dio's Time Stop is now usable more often).</li>
-                    <li><strong>Chassis Tweaks:</strong> Tank HP buffed. Speedster, Drifter, Gojo, and Sukuna received slight speed/acceleration buffs.</li>
+                    <li><strong>Lunge Fix:</strong> Lunge/Dash abilities no longer cancel out when holding movement keys.</li>
+                    <li><strong>New Weapon:</strong> Replaced Grappling Hook with the Cutlass.</li>
+                    <li><strong>Abilities Added:</strong> Cutlass shoots a Grapple, Blowtorch shoots Fireballs, Shield grants Armor, Chainsaw gives Rev Up Speed.</li>
+                    <li><strong>Damage Buffs:</strong> Blowtorch and Shield DPS significantly increased.</li>
                 </ul>
                 <hr style="border-color: #555; width: 100%; margin: 20px 0;">
-
-                <h3 style="color: #00FFFF; margin-top: 0;">v1.3.0 - Garage & Glory</h3>
+                <h3 style="color: #00FFFF; margin-top: 0;">v1.3.3 - Cleave Update</h3>
                 <ul style="color: #CCC; line-height: 1.6; padding-left: 20px; margin-bottom: 0;">
-                    <li><strong>New Chassis:</strong> The Drifter added. High speed, terrible traction, great for spin attacks!</li>
-                    <li><strong>New Weapons:</strong> The Fork-Shield (heavy knockback/defense) and The Blowtorch (cone tick damage) added.</li>
-                    <li><strong>Power-Ups:</strong> Health Kits, Armor Plating, and Overcharge Batteries now spawn dynamically in the arena.</li>
-                    <li><strong>Paint Shop:</strong> Added custom color pickers in The Garage (Applies in FFA modes).</li>
-                    <li><strong>Horns:</strong> Added working horns. Honk away! (Rebind in Settings).</li>
+                    <li><strong>Sukuna Rework:</strong> Special changed from a 3-projectile burst to a single massive sweeping Cleave.</li>
                 </ul>
             </div>
             <button class="menu-btn back-btn" onclick="showScreen('mainMenuScreen')">Back to Menu</button>
@@ -220,8 +216,8 @@
                         <option value="standard">Standard Fork</option>
                         <option value="greatsword">Greatsword</option>
                         <option value="rapier">Rapier</option>
+                        <option value="cutlass">Cutlass</option>
                         <option value="chainsaw">Chainsaw</option>
-                        <option value="grapple">Grappling Hook</option>
                         <option value="boomerang">Boomerang</option>
                         <option value="shield">The Fork-Shield</option>
                         <option value="blowtorch">The Blowtorch</option>
@@ -252,8 +248,8 @@
                         <option value="standard">Standard Fork</option>
                         <option value="greatsword">Greatsword</option>
                         <option value="rapier">Rapier</option>
+                        <option value="cutlass">Cutlass</option>
                         <option value="chainsaw">Chainsaw</option>
-                        <option value="grapple">Grappling Hook</option>
                         <option value="boomerang">Boomerang</option>
                         <option value="shield">The Fork-Shield</option>
                         <option value="blowtorch">The Blowtorch</option>
@@ -436,11 +432,11 @@
             standard:      { type: 'melee', length: 70,  swingSpeed: 0.25, retractSpeed: 0.10, damage: 20, spCooldown: 480 }, 
             greatsword:    { type: 'melee', length: 100, swingSpeed: 0.12, retractSpeed: 0.04, damage: 45, spCooldown: 400 }, 
             rapier:        { type: 'melee', length: 45,  swingSpeed: 0.50, retractSpeed: 0.25, damage: 12, spCooldown: 240 }, 
-            chainsaw:      { type: 'melee', length: 55,  swingSpeed: 0, retractSpeed: 0, damage: 4, spCooldown: 300 }, 
-            grapple:       { type: 'ranged', length: 30, fireRate: 60, projSpeed: 25, damage: 10, spCooldown: 300 }, 
+            cutlass:       { type: 'melee', length: 55,  swingSpeed: 0.35, retractSpeed: 0.15, damage: 18, spCooldown: 300 }, 
+            chainsaw:      { type: 'melee', length: 55,  swingSpeed: 0, retractSpeed: 0, damage: 6, spCooldown: 300 }, 
             boomerang:     { type: 'ranged', length: 30, fireRate: 60, projSpeed: 15, damage: 25, spCooldown: 300 }, 
-            shield:        { type: 'melee', length: 35,  swingSpeed: 0, retractSpeed: 0, damage: 0, spCooldown: 300 }, 
-            blowtorch:     { type: 'melee', length: 60,  swingSpeed: 0, retractSpeed: 0, damage: 3, spCooldown: 300 }, 
+            shield:        { type: 'melee', length: 35,  swingSpeed: 0, retractSpeed: 0, damage: 5, spCooldown: 300 }, 
+            blowtorch:     { type: 'melee', length: 60,  swingSpeed: 0, retractSpeed: 0, damage: 8, spCooldown: 300 }, 
             gojo_weapon:   { type: 'melee', length: 65,  swingSpeed: 0.30, retractSpeed: 0.15, damage: 25, spCooldown: 600 }, 
             sukuna_weapon: { type: 'melee', length: 85,  swingSpeed: 0.40, retractSpeed: 0.20, damage: 35, spCooldown: 450 }, 
             zoro_weapon:   { type: 'melee', length: 70,  swingSpeed: 0.25, retractSpeed: 0.10, damage: 15, spCooldown: 450 }, 
@@ -477,7 +473,26 @@
                     }
                 }
             }
-            draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); ctx.fillStyle = this.color; ctx.fill(); }
+            draw() { 
+                if (this.type === 'sweep') {
+                    ctx.save();
+                    ctx.translate(this.x, this.y);
+                    ctx.rotate(this.angle);
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.radius, -Math.PI/2, Math.PI/2);
+                    ctx.strokeStyle = this.color;
+                    ctx.lineWidth = 12;
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.radius - 8, -Math.PI/2.5, Math.PI/2.5);
+                    ctx.strokeStyle = "#FFF";
+                    ctx.lineWidth = 4;
+                    ctx.stroke();
+                    ctx.restore();
+                } else {
+                    ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); ctx.fillStyle = this.color; ctx.fill(); 
+                }
+            }
         }
         let projectiles = [];
 
@@ -514,8 +529,15 @@
 
                 this.angle += turn * this.stats.turn;
                 if (forward !== 0) this.speed += forward * this.stats.acc; else this.speed *= 0.92; 
-                if (this.speed > this.stats.maxSpeed) this.speed = this.stats.maxSpeed;
-                if (this.speed < -this.stats.maxSpeed / 2) this.speed = -this.stats.maxSpeed / 2;
+                
+                // Allow bypassing max speed limit temporarily if special is active (Fix for Lunge cancelling!)
+                let activeMaxSpeed = this.stats.maxSpeed;
+                if (this.specialActiveTimer > 160) {
+                    activeMaxSpeed *= 4; 
+                }
+                
+                if (this.speed > activeMaxSpeed) this.speed = activeMaxSpeed;
+                if (this.speed < -activeMaxSpeed / 2) this.speed = -activeMaxSpeed / 2;
                 
                 this.x += Math.cos(this.angle) * this.speed; this.y += Math.sin(this.angle) * this.speed;
                 
@@ -561,7 +583,7 @@
                 if (this.weapon.type === 'ranged') {
                     if (this.fireCooldown <= 0 && !this.isBlocking && isHeld) {
                         this.fireCooldown = this.weapon.fireRate;
-                        let type = this.weaponId === 'boomerang' ? 'boomerang' : (this.weaponId === 'grapple' ? 'grapple' : 'normal');
+                        let type = this.weaponId === 'boomerang' ? 'boomerang' : 'normal';
                         projectiles.push(new Projectile(this.swordTip.x, this.swordTip.y, this.angle, this.weapon.projSpeed, this.weapon.damage, this.index, this.color, this.team, 6, type));
                     }
                 } else if (this.weaponId === 'chainsaw' || this.weaponId === 'blowtorch' || this.weaponId === 'shield') {
@@ -579,8 +601,75 @@
                 if (this.specialCooldown > 0 || this.health <= 0) return;
                 if (this.batteryTimer <= 0) this.specialCooldown = this.weapon.spCooldown;
 
-                if (this.weaponId === 'standard') { this.specialActiveTimer = 180; } 
-                else if (this.weaponId === 'dio_weapon') { globalTimeStop = 180; timeStopOwner = this.index; }
+                this.specialActiveTimer = 180; // Tracks active duration for UI
+
+                switch(this.weaponId) {
+                    case 'standard': 
+                        // Quick Repair: Instantly heal 50 HP
+                        this.health = Math.min(this.stats.hp, this.health + 50); 
+                        break;
+                    case 'greatsword': 
+                        // Hurricane Spin: Massive 720-degree spin attack
+                        this.isSwinging = true; 
+                        this.hasHitThisSwing = false; 
+                        this.swordTargetAngle = Math.PI * 4; 
+                        break;
+                    case 'rapier':
+                    case 'zoro_weapon':
+                        // Dash / Lunge: Immediate massive speed boost forward
+                        this.speed = this.stats.maxSpeed * 4; 
+                        break;
+                    case 'cutlass':
+                        // Grappling Hook: Shoots a tether to pull you!
+                        projectiles.push(new Projectile(this.swordTip.x, this.swordTip.y, this.angle, 25, 10, this.index, this.color, this.team, 6, 'grapple'));
+                        break;
+                    case 'blowtorch':
+                        // Fireball: Spits a massive fiery projectile
+                        projectiles.push(new Projectile(this.swordTip.x, this.swordTip.y, this.angle, 15, 30, this.index, "#FF4500", this.team, 12, 'normal'));
+                        break;
+                    case 'shield':
+                        // Phalanx: Gain instant armor and small heal
+                        this.hasArmor = true;
+                        this.health = Math.min(this.stats.hp, this.health + 30);
+                        break;
+                    case 'chainsaw':
+                        // Rev Up: Huge speed boost and instant armor
+                        this.hasArmor = true;
+                        this.speed = this.stats.maxSpeed * 3;
+                        break;
+                    case 'gojo_weapon':
+                        // Limitless (Red): Massive AOE Repel
+                        players.forEach(p => {
+                            if (p.index !== this.index && p.active && p.health > 0) {
+                                let dx = p.x - this.x; let dy = p.y - this.y;
+                                let dist = Math.sqrt(dx*dx + dy*dy);
+                                if (dist < 250) { 
+                                    p.x += (dx/dist) * 120; 
+                                    p.y += (dy/dist) * 120; 
+                                    p.speed = 0; 
+                                    p.health -= 15; 
+                                }
+                            }
+                        });
+                        break;
+                    case 'sukuna_weapon':
+                        // Cleave: A single, massive sweeping slash projectile
+                        projectiles.push(new Projectile(this.swordTip.x, this.swordTip.y, this.angle, 22, 45, this.index, "#DC143C", this.team, 35, 'sweep'));
+                        break;
+                    case 'dio_weapon':
+                        // The World: Stop time for 3 seconds (180 frames)
+                        globalTimeStop = 180; 
+                        timeStopOwner = this.index;
+                        break;
+                    case 'boomerang':
+                        // Overclock: Instantly reset fire cooldown for a rapid double-shot
+                        this.fireCooldown = 0;
+                        break;
+                    default:
+                        // Generic Engine Overdrive for other weapons
+                        this.speed = this.stats.maxSpeed * 2.5;
+                        break;
+                }
             }
 
             useHorn() {
@@ -839,7 +928,7 @@
 
         function applyNetworkState(sArr, pArr, iArr) { 
             for(let i=0; i<4; i++) players[i].setState(sArr[i]); 
-            if (pArr) projectiles = pArr.map(p => new Projectile(p.x, p.y, 0, 0, 0, -1, p.color, p.team, p.radius)); 
+            if (pArr) projectiles = pArr.map(p => new Projectile(p.x, p.y, 0, 0, 0, -1, p.color, p.team, p.radius, p.type)); 
             if (iArr) { powerups = iArr.map(i => new PowerUp(i.x, i.y, i.type)); powerups.forEach(p => p.active = true); }
             checkGameWinCondition(); 
         }
@@ -959,7 +1048,7 @@
 
                     if (gameMode === "HOST") {
                         let statePack = players.map(p => p.getState()); 
-                        let projsPack = projectiles.map(p => ({x: p.x, y: p.y, color: p.color, team: p.team, radius: p.radius}));
+                        let projsPack = projectiles.map(p => ({x: p.x, y: p.y, color: p.color, team: p.team, radius: p.radius, type: p.type}));
                         let itemsPack = powerups.map(p => ({x: p.x, y: p.y, type: p.type}));
                         Object.values(clients).forEach(c => { if (c.conn && c.conn.open) c.conn.send({ type: "STATE", state: statePack, projs: projsPack, items: itemsPack }); });
                     }
